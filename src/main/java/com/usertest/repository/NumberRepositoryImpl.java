@@ -19,7 +19,7 @@ public class NumberRepositoryImpl implements NumberRepository{
         var sql = "INSERT INTO number (number, user_id) VALUES " +
                 "(:number, :user_id)";
 
-        var sqlParametersSource = numbers.stream()
+        MapSqlParameterSource[] sqlParametersSource = numbers.stream()
                 .map(number -> new MapSqlParameterSource()
                         .addValue("number", number)
                         .addValue("user_id", userId))
@@ -33,10 +33,7 @@ public class NumberRepositoryImpl implements NumberRepository{
         var sql = "SELECT number FROM number WHERE user_id=:userId";
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("userId", userId);
-        var queryResult = namedJdbcTemplate.queryForList(sql, parameters);
-        return queryResult.stream()
-                .map(item -> ((String) item.get("number")))
-                .collect(Collectors.toList());
+        return namedJdbcTemplate.query(sql, parameters, (rs, rowNum) -> rs.getString("number"));
     }
 
     @Override
@@ -45,12 +42,6 @@ public class NumberRepositoryImpl implements NumberRepository{
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("userId", userId);
         return namedJdbcTemplate.update(sql, parameters);
-    }
-
-    @Override
-    public int[] updateNumbers(long userId, List<String> numbers) {
-        deleteNumbersByUserId(userId);
-        return saveNumbersList(numbers,userId);
     }
 
     @Override

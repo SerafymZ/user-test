@@ -1,5 +1,6 @@
 package com.usertest.service.userservice;
 
+import com.usertest.dto.AddressDto;
 import com.usertest.dto.UserDto;
 import com.usertest.entity.UserEntity;
 import com.usertest.mapper.UserMapper;
@@ -62,7 +63,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto updateUser(long userId, UserDto userDto) {
         UserEntity userEntity = userRepository.updateUser(userDto);
-        numberRepository.updateNumbers(userId, userDto.getNumbers());
+        numberRepository.deleteNumbersByUserId(userId);
+        numberRepository.saveNumbersList(userDto.getNumbers(), userId);
         var addressResult = restService.updateAddress(userDto.getAddress());
         return userMapper.toUserDto(userEntity, userDto.getNumbers(), addressResult.getData());
     }
