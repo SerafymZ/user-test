@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class NumberEntity {
-    private long id;
-    private long userId;
+    private Long id;
+    private Long userId;
     private String number;
 }

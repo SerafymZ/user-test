@@ -1,6 +1,6 @@
 package com.usertest.repository;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -8,11 +8,11 @@ import org.springframework.stereotype.Repository;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Repository
 public class NumberRepositoryImpl implements NumberRepository{
 
-    @Autowired
-    NamedParameterJdbcTemplate namedJdbcTemplate;
+    private final NamedParameterJdbcTemplate namedJdbcTemplate;
 
     @Override
     public int[] saveNumbersList(List<String> numbers, long userId) {
@@ -48,9 +48,9 @@ public class NumberRepositoryImpl implements NumberRepository{
     }
 
     @Override
-    public int[] updateNumbers(long userId, String[] numbers) {
+    public int[] updateNumbers(long userId, List<String> numbers) {
         deleteNumbersByUserId(userId);
-        return saveNumbersList(Arrays.asList(numbers),userId);
+        return saveNumbersList(numbers,userId);
     }
 
     @Override

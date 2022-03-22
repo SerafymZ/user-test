@@ -2,11 +2,13 @@ package com.usertest.dto;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class UserDto {
-    private long id;
+    private Long id;
     private String name;
-    private int age;
-    private String[] numbers;
+    private Integer age;
+    private List<String> numbers;
     private AddressDto address;
 }

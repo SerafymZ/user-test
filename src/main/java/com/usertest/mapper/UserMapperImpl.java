@@ -56,7 +56,7 @@ public class UserMapperImpl implements UserMapper{
         }
 
         if(numbers != null) {
-            userDto.setNumbers(numbers.toArray(new String[0]));
+            userDto.setNumbers(numbers);
         }
 
         if(addressDto != null) {

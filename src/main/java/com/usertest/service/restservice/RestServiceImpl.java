@@ -2,20 +2,20 @@ package com.usertest.service.restservice;
 
 import com.usertest.dto.AddressDto;
 import com.usertest.dto.basedto.ResponseDto;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+@RequiredArgsConstructor
 @Service
 public class RestServiceImpl implements RestService{
 
     private static final String ADDRESS_URL = "http://localhost:8888/address";
 
-    @Autowired
-    RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
 
     @Override
     public ResponseDto<AddressDto> saveAddress(AddressDto addressDto) {

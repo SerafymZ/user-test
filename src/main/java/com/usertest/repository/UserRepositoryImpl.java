@@ -2,7 +2,7 @@ package com.usertest.repository;
 
 import com.usertest.dto.UserDto;
 import com.usertest.entity.UserEntity;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -11,20 +11,23 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Repository
 public class UserRepositoryImpl implements UserRepository{
 
     private static final String USER_ID = "userId";
 
-    @Autowired
-    NamedParameterJdbcTemplate namedJdbcTemplate;
+    private final NamedParameterJdbcTemplate namedJdbcTemplate;
 
     @Override
     public UserEntity saveUser(UserEntity userEntity) {
         var sql = "INSERT INTO [user] (name, age, address_id) OUTPUT inserted.* VALUES " +
                 "(:name, :age, :address_id)";
-
-        return namedJdbcTemplate.queryForObject(sql, userEntity.getSqlParams(), new BeanPropertyRowMapper<>(UserEntity.class));
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("name", userEntity.getName());
+        params.addValue("age", userEntity.getAge());
+        params.addValue("address_id", userEntity.getAddressId());
+        return namedJdbcTemplate.queryForObject(sql, params, new BeanPropertyRowMapper<>(UserEntity.class));
     }
 
     @Override

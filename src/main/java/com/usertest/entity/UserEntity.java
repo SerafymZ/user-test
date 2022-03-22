@@ -9,19 +9,8 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserEntity {
-    private long id;
+    private Long id;
     private String name;
-    private int age;
-    private long addressId;
-
-    public MapSqlParameterSource getSqlParams() {
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        if(id != 0) {
-            params.addValue("id", id);
-        }
-        params.addValue("name", name);
-        params.addValue("age", age);
-        params.addValue("address_id", addressId);
-        return params;
-    }
+    private Integer age;
+    private Long addressId;
 }

@@ -7,7 +7,7 @@ public interface NumberRepository {
     int[] saveNumbersList(List<String> numbers, long userId);
     List<String> getNumbersByUserId(long userId);
     int deleteNumbersByUserId(long userId);
-    int[] updateNumbers(long userId, String[] numbers);
+    int[] updateNumbers(long userId, List<String> numbers);
     Map<Long, List<String>> getNumbersByFilter(String partOfNumber);
 
 }

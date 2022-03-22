@@ -3,25 +3,25 @@ package com.usertest.controller;
 import com.usertest.dto.UserDto;
 import com.usertest.dto.basedto.ResponseDto;
 import com.usertest.service.userservice.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/user")
 public class UserController {
 
-    @Autowired
-    UserService userService;
+    private final UserService userService;
 
     @GetMapping("/{id}")
-    public ResponseDto<UserDto> getUserById(@PathVariable long id) {
+    public ResponseDto<UserDto> getUserById(@PathVariable Long id) {
         var userResult = userService.getUserById(id);
         return new ResponseDto<>(userResult);
     }
 
-    @GetMapping("")
+    @GetMapping
     public ResponseDto<List<UserDto>> getUsersByFilters(
             @RequestParam(name = "partOfName") String partOfName,
             @RequestParam(name = "partOfNumber") String partOfNumber
@@ -30,21 +30,21 @@ public class UserController {
         return new ResponseDto<>(users);
     }
 
-    @PostMapping()
+    @PostMapping
     public ResponseDto<UserDto> saveUser(@RequestBody UserDto user) {
         var userResult = userService.saveUser(user);
         return new ResponseDto<>(userResult);
     }
 
-    @PutMapping()
-    public ResponseDto<UserDto> updateUser(@RequestBody UserDto userDto) {
-        var userResult = userService.updateUser(userDto);
+    @PutMapping("/{id}")
+    public ResponseDto<UserDto> updateUser(@PathVariable Long userId, @RequestBody UserDto userDto) {
+        var userResult = userService.updateUser(userId, userDto);
         userResult.setNumbers(userDto.getNumbers());
         return new ResponseDto<>(userResult);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseDto<Integer> deleteUserById(@PathVariable long id) {
+    public ResponseDto<Integer> deleteUserById(@PathVariable Long id) {
         var result = userService.deleteUserById(id);
         return new ResponseDto<>(result);
     }
