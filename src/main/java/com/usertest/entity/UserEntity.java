@@ -3,7 +3,6 @@ package com.usertest.entity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 
 @Data
 @NoArgsConstructor

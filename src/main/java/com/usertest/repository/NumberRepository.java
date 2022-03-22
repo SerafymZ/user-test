@@ -1,7 +1,6 @@
 package com.usertest.repository;
 
 import java.util.List;
-import java.util.Map;
 
 public interface NumberRepository {
     int[] saveNumbersList(List<String> numbers, long userId);
