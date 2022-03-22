@@ -18,7 +18,7 @@ public class UserMapperImpl implements UserMapper{
         }
         UserEntity userEntity = new UserEntity();
 
-        if(userDto.getId() != 0) {
+        if(userDto.getId() != null) {
             userEntity.setId(userDto.getId());
         }
 
@@ -26,7 +26,7 @@ public class UserMapperImpl implements UserMapper{
             userEntity.setName(userDto.getName());
         }
 
-        if(userDto.getAge() != 0 ) {
+        if(userDto.getAge() != null ) {
             userEntity.setAge(userDto.getAge());
         }
 
@@ -45,7 +45,7 @@ public class UserMapperImpl implements UserMapper{
 
         UserDto userDto = new UserDto();
 
-        if(userEntity.getId() != 0) {
+        if(userEntity.getId() != null) {
             userDto.setId(userEntity.getId());
         }
 
@@ -53,7 +53,7 @@ public class UserMapperImpl implements UserMapper{
             userDto.setName(userEntity.getName());
         }
 
-        if(userEntity.getAge() != 0) {
+        if(userEntity.getAge() != null) {
             userDto.setAge(userEntity.getAge());
         }
 
@@ -75,7 +75,7 @@ public class UserMapperImpl implements UserMapper{
 
         UserDto userDto = new UserDto();
 
-        if (entity.getId() != 0) {
+        if (entity.getId() != null) {
             userDto.setId(entity.getId());
         }
 
@@ -83,7 +83,7 @@ public class UserMapperImpl implements UserMapper{
             userDto.setName(entity.getName());
         }
 
-        if(entity.getAge() != 0) {
+        if(entity.getAge() != null) {
             userDto.setAge(entity.getAge());
         }
 
