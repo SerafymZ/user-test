@@ -42,7 +42,7 @@ public class UserRepositoryImpl implements UserRepository{
     public List<UserWithNumberEntity> getUsersByFilters(String partOfName, String partOfNumber) {
         var sql = "SELECT u.id id, u.name name, u.age age, u.address_id address_id, n.number number FROM \n" +
                 "[user] AS u JOIN number AS n ON u.id = n.user_id\n" +
-                "WHERE name LIKE '%" + partOfName + "%' AND number LIKE '%" + partOfNumber + "%'";
+                "WHERE name LIKE '%' + :partOfName + '%' AND number LIKE '%' + :partOfNumber + '%'";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("partOfName", partOfName);
         params.addValue("partOfNumber", partOfNumber);
