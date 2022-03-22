@@ -1,8 +1,8 @@
 package com.usertest.service.userservice;
 
-import com.usertest.dto.AddressDto;
 import com.usertest.dto.UserDto;
 import com.usertest.entity.UserEntity;
+import com.usertest.entity.UserWithNumberEntity;
 import com.usertest.mapper.UserMapper;
 import com.usertest.repository.NumberRepository;
 import com.usertest.repository.UserRepository;
@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -36,19 +36,19 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> getUsersByFilters(String partOfName, String partOfNumber) {
-        var userEntities = userRepository.getUsersByFilters(partOfName);
-        var numbersMap = numberRepository.getNumbersByFilter(partOfNumber);
-        var userDtoList = new ArrayList<UserDto>();
-        for (UserEntity userEntity: userEntities) {
-            var currentUserId = userEntity.getId();
-            if (numbersMap.containsKey(currentUserId)) {
-                var addressDto = restService.getAddressById(userEntity.getAddressId());
-                var numbers = numbersMap.get(currentUserId);
-                var userDto = userMapper.toUserDto(userEntity, numbers, addressDto.getData());
-                userDtoList.add(userDto);
+        var userEntities = userRepository.getUsersByFilters(partOfName, partOfNumber);
+        HashMap<Long, UserDto> usersMap = new HashMap<>();
+        for(UserWithNumberEntity entity : userEntities) {
+            var addressDto = restService.getAddressById(entity.getAddressId());
+            if (usersMap.containsKey(entity.getId())) {
+                var userDto = usersMap.get(entity.getId());
+                userDto.getNumbers().add(entity.getNumber());
+            } else {
+                var userDto = userMapper.toUserDto(entity, addressDto.getData());
+                usersMap.put(entity.getId(), userDto);
             }
         }
-        return userDtoList;
+        return new ArrayList<>(usersMap.values());
     }
 
     @Override

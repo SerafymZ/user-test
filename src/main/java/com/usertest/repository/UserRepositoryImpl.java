@@ -2,6 +2,7 @@ package com.usertest.repository;
 
 import com.usertest.dto.UserDto;
 import com.usertest.entity.UserEntity;
+import com.usertest.entity.UserWithNumberEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -9,7 +10,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Repository
@@ -39,18 +39,14 @@ public class UserRepositoryImpl implements UserRepository{
     }
 
     @Override
-    public List<UserEntity> getUsersByFilters(String partOfName) {
-        var sql = "SELECT id AS user_id, name, age, address_id FROM [user] where name LIKE '%" + partOfName +"%'";
+    public List<UserWithNumberEntity> getUsersByFilters(String partOfName, String partOfNumber) {
+        var sql = "SELECT u.id id, u.name name, u.age age, u.address_id address_id, n.number number FROM \n" +
+                "[user] AS u JOIN number AS n ON u.id = n.user_id\n" +
+                "WHERE name LIKE '%" + partOfName + "%' AND number LIKE '%" + partOfNumber + "%'";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("partOfName", partOfName);
-        var queryResult = namedJdbcTemplate.queryForList(sql, params);
-        return queryResult.stream().map(map -> new UserEntity(
-                        (long) map.get("user_id"),
-                        (String) map.get("name"),
-                        (int) map.get("age"),
-                        (long) map.get("address_id")
-                    )
-                ).collect(Collectors.toList());
+        params.addValue("partOfNumber", partOfNumber);
+        return namedJdbcTemplate.query(sql, params, new BeanPropertyRowMapper<>(UserWithNumberEntity.class));
     }
 
     @Override

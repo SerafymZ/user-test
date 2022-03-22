@@ -3,8 +3,10 @@ package com.usertest.mapper;
 import com.usertest.dto.AddressDto;
 import com.usertest.dto.UserDto;
 import com.usertest.entity.UserEntity;
+import com.usertest.entity.UserWithNumberEntity;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -62,6 +64,39 @@ public class UserMapperImpl implements UserMapper{
         if(addressDto != null) {
             userDto.setAddress(addressDto);
         }
+        return userDto;
+    }
+
+    @Override
+    public UserDto toUserDto(UserWithNumberEntity entity, AddressDto addressDto) {
+        if(entity == null) {
+            return null;
+        }
+
+        UserDto userDto = new UserDto();
+
+        if (entity.getId() != 0) {
+            userDto.setId(entity.getId());
+        }
+
+        if(entity.getName() != null) {
+            userDto.setName(entity.getName());
+        }
+
+        if(entity.getAge() != 0) {
+            userDto.setAge(entity.getAge());
+        }
+
+        if(entity.getNumber() != null) {
+            ArrayList<String> numbers = new ArrayList<>();
+            numbers.add(entity.getNumber());
+            userDto.setNumbers(numbers);
+        }
+
+        if(addressDto != null) {
+            userDto.setAddress(addressDto);
+        }
+
         return userDto;
     }
 }
