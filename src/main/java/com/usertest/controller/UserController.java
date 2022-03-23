@@ -37,8 +37,8 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseDto<UserDto> updateUser(@PathVariable Long userId, @RequestBody UserDto userDto) {
-        var userResult = userService.updateUser(userId, userDto);
+    public ResponseDto<UserDto> updateUser(@PathVariable Long id, @RequestBody UserDto userDto) {
+        var userResult = userService.updateUser(id, userDto);
         userResult.setNumbers(userDto.getNumbers());
         return new ResponseDto<>(userResult);
     }

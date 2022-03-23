@@ -5,10 +5,11 @@ import com.usertest.entity.UserEntity;
 import com.usertest.entity.UserWithNumberEntity;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserRepository {
     UserEntity saveUser(UserEntity userDto);
-    UserEntity getUserById(long id);
+    Optional<UserEntity> getUserById(long id);
     List<UserWithNumberEntity> getUsersByFilters(String partOfName, String partOfNumber);
     UserEntity updateUser(UserEntity userEntity);
     int deleteUserById(long id);

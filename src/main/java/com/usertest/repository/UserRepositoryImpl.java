@@ -1,15 +1,16 @@
 package com.usertest.repository;
 
-import com.usertest.dto.UserDto;
 import com.usertest.entity.UserEntity;
 import com.usertest.entity.UserWithNumberEntity;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Repository
@@ -31,11 +32,17 @@ public class UserRepositoryImpl implements UserRepository{
     }
 
     @Override
-    public UserEntity getUserById(long id) {
+    public Optional<UserEntity> getUserById(long id) {
         var sql = "SELECT id, [name], age, address_id FROM [user] WHERE id=:userId";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue(USER_ID, id);
-        return namedJdbcTemplate.queryForObject(sql, params, new BeanPropertyRowMapper<>(UserEntity.class));
+        UserEntity userEntity;
+        try {
+            userEntity = namedJdbcTemplate.queryForObject(sql, params, new BeanPropertyRowMapper<>(UserEntity.class));
+        } catch (EmptyResultDataAccessException exception) {
+            return Optional.empty();
+        }
+        return Optional.of(userEntity);
     }
 
     @Override
