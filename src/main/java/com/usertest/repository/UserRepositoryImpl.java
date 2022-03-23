@@ -58,7 +58,7 @@ public class UserRepositoryImpl implements UserRepository{
         parameters.addValue(USER_ID, userDto.getId());
         parameters.addValue("userName", userDto.getName());
         parameters.addValue("userAge", userDto.getAge());
-        parameters.addValue("addressId", userDto.getAddress().getId());
+        parameters.addValue("addressId", userDto.getAddress());
         return namedJdbcTemplate.queryForObject(sql, parameters, new BeanPropertyRowMapper<>(UserEntity.class));
     }
 

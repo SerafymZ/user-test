@@ -10,5 +10,5 @@ public class UserDto {
     private String name;
     private Integer age;
     private List<String> numbers;
-    private AddressDto address;
+    private String address;
 }

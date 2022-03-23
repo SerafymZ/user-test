@@ -12,7 +12,7 @@ import java.util.List;
 @Component
 public class UserMapperImpl implements UserMapper{
     @Override
-    public UserEntity toUserEntity(UserDto userDto) {
+    public UserEntity toUserEntity(UserDto userDto, Long addressId) {
         if (userDto == null) {
             return null;
         }
@@ -30,8 +30,8 @@ public class UserMapperImpl implements UserMapper{
             userEntity.setAge(userDto.getAge());
         }
 
-        if(userDto.getAddress() != null) {
-            userEntity.setAddressId(userDto.getAddress().getId());
+        if(addressId != null) {
+            userEntity.setAddressId(addressId);
         }
 
         return userEntity;
@@ -62,7 +62,7 @@ public class UserMapperImpl implements UserMapper{
         }
 
         if(addressDto != null) {
-            userDto.setAddress(addressDto);
+            userDto.setAddress(addressDto.getAddress());
         }
         return userDto;
     }
@@ -94,7 +94,7 @@ public class UserMapperImpl implements UserMapper{
         }
 
         if(addressDto != null) {
-            userDto.setAddress(addressDto);
+            userDto.setAddress(addressDto.getAddress());
         }
 
         return userDto;

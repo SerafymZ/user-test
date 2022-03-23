@@ -18,7 +18,7 @@ public class RestServiceImpl implements RestService{
     private final RestTemplate restTemplate;
 
     @Override
-    public ResponseDto<AddressDto> saveAddress(AddressDto addressDto) {
+    public ResponseDto<AddressDto> findOrInsertAddress(String addressDto) {
         var httpEntity = new HttpEntity<>(addressDto);
         var result = restTemplate.exchange(
                 ADDRESS_URL,

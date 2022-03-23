@@ -53,9 +53,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto saveUser(UserDto userDto) {
-        var responseAddressDto = restService.saveAddress(userDto.getAddress());
-        userDto.getAddress().setId(responseAddressDto.getData().getId());
-        UserEntity userEntity = userRepository.saveUser(userMapper.toUserEntity(userDto));
+        var responseAddressDto = restService.findOrInsertAddress(userDto.getAddress());
+        UserEntity userEntity = userRepository.saveUser(userMapper.toUserEntity(userDto, responseAddressDto.getData().getId()));
         numberRepository.saveNumbersList(userDto.getNumbers(), userEntity.getId());
         return userMapper.toUserDto(userEntity, userDto.getNumbers(), responseAddressDto.getData());
     }
@@ -65,7 +64,7 @@ public class UserServiceImpl implements UserService {
         UserEntity userEntity = userRepository.updateUser(userDto);
         numberRepository.deleteNumbersByUserId(userId);
         numberRepository.saveNumbersList(userDto.getNumbers(), userId);
-        var addressResult = restService.updateAddress(userDto.getAddress());
+        var addressResult = restService.findOrInsertAddress(userDto.getAddress());
         return userMapper.toUserDto(userEntity, userDto.getNumbers(), addressResult.getData());
     }
 

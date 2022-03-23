@@ -8,7 +8,7 @@ import com.usertest.entity.UserWithNumberEntity;
 import java.util.List;
 
 public interface UserMapper {
-    UserEntity toUserEntity(UserDto userDto);
+    UserEntity toUserEntity(UserDto userDto, Long addressId);
 
     UserDto toUserDto(UserEntity userEntity, List<String> numbers, AddressDto addressDto);
 
