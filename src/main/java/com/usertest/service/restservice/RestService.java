@@ -4,7 +4,7 @@ import com.usertest.dto.AddressDto;
 import com.usertest.dto.basedto.ResponseDto;
 
 public interface RestService {
-    ResponseDto<AddressDto> findOrInsertAddress(String addressDto);
+    ResponseDto<AddressDto> findOrInsertAddress(AddressDto addressDto);
     ResponseDto<AddressDto> getAddressById(long addressId);
     ResponseDto<Integer> deleteAddressById(long addressId);
     ResponseDto<AddressDto>updateAddress(AddressDto addressDto);

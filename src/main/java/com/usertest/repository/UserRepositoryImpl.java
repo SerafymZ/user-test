@@ -50,15 +50,15 @@ public class UserRepositoryImpl implements UserRepository{
     }
 
     @Override
-    public UserEntity updateUser(UserDto userDto) {
+    public UserEntity updateUser(UserEntity userEntity) {
         var sql = "UPDATE [user] SET name=:userName, age=:userAge, address_id=:addressId " +
                 "OUTPUT inserted.* " +
                 "WHERE id=:userId";
         MapSqlParameterSource parameters = new MapSqlParameterSource();
-        parameters.addValue(USER_ID, userDto.getId());
-        parameters.addValue("userName", userDto.getName());
-        parameters.addValue("userAge", userDto.getAge());
-        parameters.addValue("addressId", userDto.getAddress());
+        parameters.addValue(USER_ID, userEntity.getId());
+        parameters.addValue("userName", userEntity.getName());
+        parameters.addValue("userAge", userEntity.getAge());
+        parameters.addValue("addressId", userEntity.getAddressId());
         return namedJdbcTemplate.queryForObject(sql, parameters, new BeanPropertyRowMapper<>(UserEntity.class));
     }
 

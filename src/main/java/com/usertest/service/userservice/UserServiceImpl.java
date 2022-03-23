@@ -1,5 +1,6 @@
 package com.usertest.service.userservice;
 
+import com.usertest.dto.AddressDto;
 import com.usertest.dto.UserDto;
 import com.usertest.entity.UserEntity;
 import com.usertest.entity.UserWithNumberEntity;
@@ -9,6 +10,7 @@ import com.usertest.repository.UserRepository;
 import com.usertest.service.restservice.RestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,23 +53,30 @@ public class UserServiceImpl implements UserService {
         return new ArrayList<>(usersMap.values());
     }
 
+    @Transactional
     @Override
     public UserDto saveUser(UserDto userDto) {
-        var responseAddressDto = restService.findOrInsertAddress(userDto.getAddress());
+        var addressDto = new AddressDto();
+        addressDto.setAddress(userDto.getAddress());
+        var responseAddressDto = restService.findOrInsertAddress(addressDto);
         UserEntity userEntity = userRepository.saveUser(userMapper.toUserEntity(userDto, responseAddressDto.getData().getId()));
         numberRepository.saveNumbersList(userDto.getNumbers(), userEntity.getId());
         return userMapper.toUserDto(userEntity, userDto.getNumbers(), responseAddressDto.getData());
     }
 
+    @Transactional
     @Override
     public UserDto updateUser(long userId, UserDto userDto) {
-        UserEntity userEntity = userRepository.updateUser(userDto);
+        var addressDto = new AddressDto();
+        addressDto.setAddress(userDto.getAddress());
+        var addressResult = restService.findOrInsertAddress(addressDto);
+        UserEntity userEntity = userRepository.updateUser(userMapper.toUserEntity(userDto, addressResult.getData().getId()));
         numberRepository.deleteNumbersByUserId(userId);
         numberRepository.saveNumbersList(userDto.getNumbers(), userId);
-        var addressResult = restService.findOrInsertAddress(userDto.getAddress());
         return userMapper.toUserDto(userEntity, userDto.getNumbers(), addressResult.getData());
     }
 
+    @Transactional
     @Override
     public int deleteUserById(long id) {
         var userDto = userRepository.getUserById(id);

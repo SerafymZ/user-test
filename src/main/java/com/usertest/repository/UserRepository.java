@@ -10,6 +10,6 @@ public interface UserRepository {
     UserEntity saveUser(UserEntity userDto);
     UserEntity getUserById(long id);
     List<UserWithNumberEntity> getUsersByFilters(String partOfName, String partOfNumber);
-    UserEntity updateUser(UserDto userDto);
+    UserEntity updateUser(UserEntity userEntity);
     int deleteUserById(long id);
 }
