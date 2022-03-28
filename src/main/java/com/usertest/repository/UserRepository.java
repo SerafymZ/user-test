@@ -1,6 +1,5 @@
 package com.usertest.repository;
 
-import com.usertest.dto.UserDto;
 import com.usertest.entity.UserEntity;
 import com.usertest.entity.UserWithNumberEntity;
 
@@ -13,4 +12,5 @@ public interface UserRepository {
     List<UserWithNumberEntity> getUsersByFilters(String partOfName, String partOfNumber);
     UserEntity updateUser(UserEntity userEntity);
     int deleteUserById(long id);
+    int addressUsersCount(long addressId);
 }

@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -75,5 +76,15 @@ public class UserRepositoryImpl implements UserRepository{
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue(USER_ID, id);
         return namedJdbcTemplate.update(sql, params);
+    }
+
+    @Override
+    public int addressUsersCount(long addressId) {
+        var sql = "SELECT id AS count FROM [user] WHERE address_id = :addressId";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("addressId", addressId);
+
+        List<Map<String, Object>> result = namedJdbcTemplate.queryForList(sql, params);
+        return result.size();
     }
 }

@@ -3,14 +3,17 @@ package com.usertest.service.userservice;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.usertest.dto.AddressDto;
 import com.usertest.dto.UserDto;
+import com.usertest.dto.basedto.ResponseDto;
 import com.usertest.entity.UserEntity;
 import com.usertest.entity.UserWithNumberEntity;
+import com.usertest.exception.IdValuesDoNotMatchException;
 import com.usertest.exception.NotFoundNumberException;
 import com.usertest.exception.NotFoundUserException;
 import com.usertest.mapper.UserMapper;
 import com.usertest.repository.NumberRepository;
 import com.usertest.repository.UserRepository;
 import com.usertest.service.addressrestservice.AddressRestService;
+import com.usertest.service.userdtovalidationservice.UserDtoValidationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,11 +35,13 @@ public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper;
 
+    private final UserDtoValidationService userDtoValidationService;
+
     @Override
     public UserDto getUserById(long id) throws ResourceAccessException, JsonProcessingException {
         UserEntity userEntity = userRepository.getUserById(id).orElseThrow(() ->
                 new NotFoundUserException("There is no user with ID = " + id + " in database."));
-        var responseAddressDto = addressRestService.getAddressById(userEntity.getAddressId());
+        ResponseDto<AddressDto> responseAddressDto = addressRestService.getAddressById(userEntity.getAddressId());
         List<String> numberEntitiesList = numberRepository.getNumbersByUserId(id);
         return userMapper.toUserDto(userEntity, numberEntitiesList, responseAddressDto.getData());
     }
@@ -44,12 +49,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserDto> getUsersByFilters(String partOfName, String partOfNumber)
             throws ResourceAccessException, JsonProcessingException {
-        var userEntities = userRepository.getUsersByFilters(partOfName, partOfNumber);
+        List<UserWithNumberEntity> userEntities = userRepository.getUsersByFilters(partOfName, partOfNumber);
         HashMap<Long, UserDto> usersMap = new HashMap<>();
         for(UserWithNumberEntity entity : userEntities) {
-            var addressDto = addressRestService.getAddressById(entity.getAddressId());
+            ResponseDto<AddressDto> addressDto = addressRestService.getAddressById(entity.getAddressId());
             if (usersMap.containsKey(entity.getId())) {
-                var userDto = usersMap.get(entity.getId());
+                UserDto userDto = usersMap.get(entity.getId());
                 userDto.getNumbers().add(entity.getNumber());
             } else {
                 var userDto = userMapper.toUserDto(entity, addressDto.getData());
@@ -62,9 +67,10 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public UserDto saveUser(UserDto userDto) throws ResourceAccessException,JsonProcessingException {
+        userDtoValidationService.validate(userDto);
         var addressDto = new AddressDto();
         addressDto.setAddress(userDto.getAddress());
-        var responseAddressDto = addressRestService.findOrInsertAddress(addressDto);
+        ResponseDto<AddressDto> responseAddressDto = addressRestService.findOrInsertAddress(addressDto);
         UserEntity userEntity = userRepository.saveUser(
                 userMapper.toUserEntity(userDto, responseAddressDto.getData().getId())
         );
@@ -75,11 +81,16 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public UserDto updateUser(long userId, UserDto userDto) throws ResourceAccessException, JsonProcessingException {
+        if (userDto.getId() == null || userId != userDto.getId()) {
+            throw new IdValuesDoNotMatchException("User ids don't match. Id from url = " + userId + ". " +
+                    "Id in user dto = " + userDto.getId());
+        }
+        userDtoValidationService.validate(userDto);
         var addressDto = new AddressDto();
         addressDto.setAddress(userDto.getAddress());
         userRepository.getUserById(userId).orElseThrow(() ->
                 new NotFoundUserException("There is no user with ID = " + userId + " in database."));
-        var addressResult = addressRestService.findOrInsertAddress(addressDto);
+        ResponseDto<AddressDto> addressResult = addressRestService.findOrInsertAddress(addressDto);
 
         UserEntity userEntity = userRepository.updateUser(
                 userMapper.toUserEntity(userDto, addressResult.getData().getId())
@@ -101,7 +112,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public int deleteUserById(long userId) throws ResourceAccessException, JsonProcessingException {
-        var userDto = userRepository.getUserById(userId).orElseThrow(() ->
+        UserEntity userDto = userRepository.getUserById(userId).orElseThrow(() ->
                 new NotFoundUserException("There is no user with ID = " + userId + " in database."));
         int result = userRepository.deleteUserById(userId);
         if (result == 0) {
@@ -114,7 +125,10 @@ public class UserServiceImpl implements UserService {
                 throw new NotFoundNumberException("There is no numbers with user ID = " + userId + " in database.");
             }
         }
-        addressRestService.deleteAddressById(userDto.getAddressId());
+        Long addressId = userDto.getAddressId();
+        if(addressId != null && userRepository.addressUsersCount(addressId) == 0) {
+            addressRestService.deleteAddressById(addressId);
+        }
         return result;
     }
 }

@@ -2,6 +2,7 @@ package com.usertest.exception;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.usertest.dto.basedto.ResponseDto;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -24,12 +25,12 @@ public class UserExceptionHandler {
 
     @ExceptionHandler
     public ResponseEntity<ResponseDto<String>> handleException(ResourceAccessException exception) {
-        return new ResponseEntity<>(ResponseDto.failedResponseDto(exception.getMessage()), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(ResponseDto.failedResponseDto(exception.getMessage()), HttpStatus.NOT_ACCEPTABLE);
     }
 
     @ExceptionHandler
     public ResponseEntity<ResponseDto<String>> handleException(JsonProcessingException exception) {
-        return new ResponseEntity<>(ResponseDto.failedResponseDto(exception.getMessage()), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(ResponseDto.failedResponseDto(exception.getMessage()), HttpStatus.EXPECTATION_FAILED);
     }
 
     @ExceptionHandler
@@ -44,6 +45,31 @@ public class UserExceptionHandler {
 
     @ExceptionHandler
     ResponseEntity<ResponseDto<String>> handleException(RestClientException exception) {
+        return new ResponseEntity<>(ResponseDto.failedResponseDto(exception.getMessage()), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler
+    ResponseEntity<ResponseDto<String>> handleException(MaxStringFieldValueExceedException exception) {
         return new ResponseEntity<>(ResponseDto.failedResponseDto(exception.getMessage()), HttpStatus.EXPECTATION_FAILED);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ResponseDto<String>> handleException(DataAccessException exception) {
+        return new ResponseEntity<>(ResponseDto.failedResponseDto(exception.getMessage()), HttpStatus.NOT_ACCEPTABLE);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ResponseDto<String>> handleException(NullPointerException exception) {
+        return new ResponseEntity<>(ResponseDto.failedResponseDto(exception.getMessage()), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ResponseDto<String>> handleException(IncorrectAgeException exception) {
+        return new ResponseEntity<>(ResponseDto.failedResponseDto(exception.getMessage()), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ResponseDto<String>> handleException(IdValuesDoNotMatchException exception) {
+        return new ResponseEntity<>(ResponseDto.failedResponseDto(exception.getMessage()), HttpStatus.NOT_FOUND);
     }
 }

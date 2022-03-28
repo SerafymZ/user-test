@@ -20,7 +20,7 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseDto<UserDto> getUserById(@PathVariable Long id)
             throws ResourceAccessException, JsonProcessingException {
-        var userResult = userService.getUserById(id);
+        UserDto userResult = userService.getUserById(id);
         return new ResponseDto<>(userResult);
     }
 
@@ -29,21 +29,21 @@ public class UserController {
             @RequestParam(name = "partOfName") String partOfName,
             @RequestParam(name = "partOfNumber") String partOfNumber
     ) throws ResourceAccessException, JsonProcessingException {
-        var users = userService.getUsersByFilters(partOfName, partOfNumber);
+        List<UserDto> users = userService.getUsersByFilters(partOfName, partOfNumber);
         return new ResponseDto<>(users);
     }
 
     @PostMapping
     public ResponseDto<UserDto> saveUser(@RequestBody UserDto user)
             throws ResourceAccessException, JsonProcessingException {
-        var userResult = userService.saveUser(user);
+        UserDto userResult = userService.saveUser(user);
         return new ResponseDto<>(userResult);
     }
 
     @PutMapping("/{id}")
     public ResponseDto<UserDto> updateUser(@PathVariable Long id, @RequestBody UserDto userDto)
             throws ResourceAccessException, JsonProcessingException {
-        var userResult = userService.updateUser(id, userDto);
+        UserDto userResult = userService.updateUser(id, userDto);
         userResult.setNumbers(userDto.getNumbers());
         return new ResponseDto<>(userResult);
     }
@@ -51,7 +51,7 @@ public class UserController {
     @DeleteMapping("/{id}")
     public ResponseDto<Integer> deleteUserById(@PathVariable Long id)
             throws ResourceAccessException, JsonProcessingException {
-        var result = userService.deleteUserById(id);
+        int result = userService.deleteUserById(id);
         return new ResponseDto<>(result);
     }
 }
