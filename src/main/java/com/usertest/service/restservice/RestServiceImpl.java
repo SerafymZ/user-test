@@ -1,11 +1,10 @@
 package com.usertest.service.restservice;
 
 import com.usertest.dto.AddressDto;
-import com.usertest.dto.basedto.ResponseDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -18,46 +17,42 @@ public class RestServiceImpl implements RestService{
     private final RestTemplate restTemplate;
 
     @Override
-    public ResponseDto<AddressDto> findOrInsertAddress(AddressDto addressDto) {
+    public ResponseEntity<String> findOrInsertAddress(AddressDto addressDto) {
         var httpEntity = new HttpEntity<>(addressDto);
-        var result = restTemplate.exchange(
+        return restTemplate.exchange(
                 ADDRESS_URL,
                 HttpMethod.POST,
                 httpEntity,
-                new ParameterizedTypeReference<ResponseDto<AddressDto>>(){});
-        return result.getBody();
+                String.class);
     }
 
     @Override
-    public ResponseDto<AddressDto> getAddressById(long addressId) {
+    public ResponseEntity<String> getAddressById(long addressId) {
         var httpEntity = new HttpEntity<>(addressId);
-        var result = restTemplate.exchange(
+        return restTemplate.exchange(
                 ADDRESS_URL + "/" +addressId,
                 HttpMethod.GET,
                 httpEntity,
-                new ParameterizedTypeReference<ResponseDto<AddressDto>>(){});
-        return result.getBody();
+                String.class);
     }
 
     @Override
-    public ResponseDto<Integer> deleteAddressById(long addressId) {
+    public ResponseEntity<String> deleteAddressById(long addressId) {
         var httpEntity = new HttpEntity<>(addressId);
-        var result = restTemplate.exchange(
+        return restTemplate.exchange(
                 ADDRESS_URL + "/" +addressId,
                 HttpMethod.DELETE,
                 httpEntity,
-                new ParameterizedTypeReference<ResponseDto<Integer>>(){});
-        return result.getBody();
+                String.class);
     }
 
     @Override
-    public ResponseDto<AddressDto> updateAddress(AddressDto addressDto) {
+    public ResponseEntity<String> updateAddress(AddressDto addressDto) {
         var httpEntity = new HttpEntity<>(addressDto);
-        var result = restTemplate.exchange(
+        return restTemplate.exchange(
                 ADDRESS_URL,
                 HttpMethod.PUT,
                 httpEntity,
-                new ParameterizedTypeReference<ResponseDto<AddressDto>>(){});
-        return result.getBody();
+                String.class);
     }
 }
