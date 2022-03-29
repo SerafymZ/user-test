@@ -27,6 +27,11 @@ import java.util.List;
 @Service
 public class UserServiceImpl implements UserService {
 
+    private static final String NOT_FOUND_USER_MESSAGE_PART_1 = "There is no user with ID = ";
+    private static final String NOT_FOUND_USER_MESSAGE_PART_2 = " in database.";
+    private static final String NOT_FOUND_NUMBER_MESSAGE_PART_1 = "There is no numbers with user ID = ";
+    private static final String NOT_FOUND_NUMBER_MESSAGE_PART_2 = " in database.";
+
     private final AddressRestService addressRestService;
 
     private final UserRepository userRepository;
@@ -40,7 +45,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto getUserById(long id) throws ResourceAccessException, JsonProcessingException {
         UserEntity userEntity = userRepository.getUserById(id).orElseThrow(() ->
-                new NotFoundUserException("There is no user with ID = " + id + " in database."));
+                new NotFoundUserException(NOT_FOUND_USER_MESSAGE_PART_1 + id + NOT_FOUND_USER_MESSAGE_PART_2));
         ResponseDto<AddressDto> responseAddressDto = addressRestService.getAddressById(userEntity.getAddressId());
         List<String> numberEntitiesList = numberRepository.getNumbersByUserId(id);
         return userMapper.toUserDto(userEntity, numberEntitiesList, responseAddressDto.getData());
@@ -89,7 +94,7 @@ public class UserServiceImpl implements UserService {
         var addressDto = new AddressDto();
         addressDto.setAddress(userDto.getAddress());
         userRepository.getUserById(userId).orElseThrow(() ->
-                new NotFoundUserException("There is no user with ID = " + userId + " in database."));
+                new NotFoundUserException(NOT_FOUND_USER_MESSAGE_PART_1 + userId + NOT_FOUND_USER_MESSAGE_PART_2));
         ResponseDto<AddressDto> addressResult = addressRestService.findOrInsertAddress(addressDto);
 
         UserEntity userEntity = userRepository.updateUser(
@@ -99,7 +104,9 @@ public class UserServiceImpl implements UserService {
         if(existNumbers != null && !existNumbers.isEmpty()) {
             int deleteNumbersResult = numberRepository.deleteNumbersByUserId(userId);
             if (deleteNumbersResult == 0) {
-                throw new NotFoundNumberException("There is no numbers with user ID = " + userId + " in database.");
+                throw new NotFoundNumberException(
+                        NOT_FOUND_NUMBER_MESSAGE_PART_1 + userId + NOT_FOUND_NUMBER_MESSAGE_PART_2
+                );
             }
         }
         if (userDto.getNumbers() != null && !userDto.getNumbers().isEmpty()) {
@@ -113,16 +120,18 @@ public class UserServiceImpl implements UserService {
     @Override
     public int deleteUserById(long userId) throws ResourceAccessException, JsonProcessingException {
         UserEntity userDto = userRepository.getUserById(userId).orElseThrow(() ->
-                new NotFoundUserException("There is no user with ID = " + userId + " in database."));
+                new NotFoundUserException(NOT_FOUND_USER_MESSAGE_PART_1 + userId + NOT_FOUND_USER_MESSAGE_PART_2));
         int result = userRepository.deleteUserById(userId);
         if (result == 0) {
-            throw new NotFoundUserException("There is no user with ID = " + userId + " in database.");
+            throw new NotFoundUserException(NOT_FOUND_USER_MESSAGE_PART_1 + userId + NOT_FOUND_USER_MESSAGE_PART_2);
         }
         List<String> existNumbers = numberRepository.getNumbersByUserId(userId);
         if (existNumbers != null && !existNumbers.isEmpty()) {
             int deleteNumbersResult = numberRepository.deleteNumbersByUserId(userId);
             if (deleteNumbersResult == 0) {
-                throw new NotFoundNumberException("There is no numbers with user ID = " + userId + " in database.");
+                throw new NotFoundNumberException(
+                        NOT_FOUND_NUMBER_MESSAGE_PART_1 + userId + NOT_FOUND_NUMBER_MESSAGE_PART_2
+                );
             }
         }
         Long addressId = userDto.getAddressId();

@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ValidationServiceImpl implements ResponseValidationService {
+public class ResponseValidationServiceImpl implements ResponseValidationService {
     @Override
     public void checkStatusResponseEntity(ResponseEntity responseEntity, AddressOperationType operationType) {
         int statusCode = responseEntity.getStatusCodeValue();
