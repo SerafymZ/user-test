@@ -67,9 +67,4 @@ public class UserExceptionHandler {
     public ResponseEntity<ResponseDto<String>> handleException(IncorrectAgeException exception) {
         return new ResponseEntity<>(ResponseDto.failedResponseDto(exception.getMessage()), HttpStatus.NOT_FOUND);
     }
-
-    @ExceptionHandler
-    public ResponseEntity<ResponseDto<String>> handleException(IdValuesDoNotMatchException exception) {
-        return new ResponseEntity<>(ResponseDto.failedResponseDto(exception.getMessage()), HttpStatus.NOT_FOUND);
-    }
 }

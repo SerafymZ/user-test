@@ -6,7 +6,6 @@ import com.usertest.dto.UserDto;
 import com.usertest.dto.basedto.ResponseDto;
 import com.usertest.entity.UserEntity;
 import com.usertest.entity.UserWithNumberEntity;
-import com.usertest.exception.IdValuesDoNotMatchException;
 import com.usertest.exception.NotFoundNumberException;
 import com.usertest.exception.NotFoundUserException;
 import com.usertest.mapper.UserMapper;
@@ -86,10 +85,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public UserDto updateUser(long userId, UserDto userDto) throws ResourceAccessException, JsonProcessingException {
-        if (userDto.getId() == null || userId != userDto.getId()) {
-            throw new IdValuesDoNotMatchException("User ids don't match. Id from url = " + userId + ". " +
-                    "Id in user dto = " + userDto.getId());
-        }
+        userDto.setId(userId);
         userDtoValidationService.validate(userDto);
         var addressDto = new AddressDto();
         addressDto.setAddress(userDto.getAddress());
