@@ -10,12 +10,11 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @RequiredArgsConstructor
 @Repository
-public class UserRepositoryImpl implements UserRepository{
+public class UserRepositoryImpl implements UserRepository {
 
     private static final String USER_ID = "userId";
 
@@ -33,17 +32,20 @@ public class UserRepositoryImpl implements UserRepository{
     }
 
     @Override
-    public Optional<UserEntity> getUserById(long id) {
-        var sql = "SELECT id, [name], age, address_id FROM [user] WHERE id=:userId";
+    public Optional<UserWithNumberEntity> getUserWithNumbersById(long id) {
+        var sql = "  SELECT u.id AS userId, u.name AS name, u.age AS age, string_agg(n.number, ',') AS number, u.address_id AS address_id FROM \n" +
+                "  [user] AS u JOIN number AS n ON u.id = n.user_id\n" +
+                "  WHERE u.id = :userId\n" +
+                "  GROUP BY u.id, name, age, address_id";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue(USER_ID, id);
-        UserEntity userEntity;
         try {
-            userEntity = namedJdbcTemplate.queryForObject(sql, params, new BeanPropertyRowMapper<>(UserEntity.class));
+            UserWithNumberEntity userWithNumberEntity = namedJdbcTemplate
+                    .queryForObject(sql, params, new BeanPropertyRowMapper<>(UserWithNumberEntity.class));
+            return Optional.of(userWithNumberEntity);
         } catch (EmptyResultDataAccessException exception) {
             return Optional.empty();
         }
-        return Optional.of(userEntity);
     }
 
     @Override
@@ -80,11 +82,9 @@ public class UserRepositoryImpl implements UserRepository{
 
     @Override
     public int addressUsersCount(long addressId) {
-        var sql = "SELECT id AS count FROM [user] WHERE address_id = :addressId";
+        var sql = "SELECT COUNT(id) AS count FROM [user] WHERE address_id = :addressId";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("addressId", addressId);
-
-        List<Map<String, Object>> result = namedJdbcTemplate.queryForList(sql, params);
-        return result.size();
+        return namedJdbcTemplate.queryForObject(sql, params, Integer.class);
     }
 }

@@ -6,8 +6,9 @@ import com.usertest.entity.UserEntity;
 import com.usertest.entity.UserWithNumberEntity;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class UserMapperImpl implements UserMapper{
@@ -89,8 +90,8 @@ public class UserMapperImpl implements UserMapper{
         }
 
         if(entity.getNumber() != null) {
-            ArrayList<String> numbers = new ArrayList<>();
-            numbers.add(entity.getNumber());
+            List<String> numbers = Arrays.stream(entity.getNumber().split(","))
+                    .collect(Collectors.toList());
             userDto.setNumbers(numbers);
         }
 

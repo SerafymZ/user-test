@@ -1,16 +1,17 @@
 package com.usertest.service.responsevalidationservice;
 
-public enum AddressOperationType {
-    FIND_OR_INSERT_ADDRESS,
-    GET_ADDRESS_BY_ID,
-    UPDATE_ADDRESS,
-    DELETE_ADDRESS_BY_ID;
+import lombok.Getter;
 
-    public String getDisplayName() {
-        if (this == FIND_OR_INSERT_ADDRESS) return "find or insert address";
-        else if (this == GET_ADDRESS_BY_ID) return "get address by id";
-        else if (this == UPDATE_ADDRESS) return  "update address";
-        else if (this == DELETE_ADDRESS_BY_ID) return "delete address by id";
-        else return "unknown operation";
+@Getter
+public enum AddressOperationType {
+    FIND_OR_INSERT_ADDRESS("find or insert address"),
+    GET_ADDRESS_BY_ID("get address by id"),
+    UPDATE_ADDRESS("update address"),
+    DELETE_ADDRESS_BY_ID("delete address by id");
+
+    private final String displayName;
+
+    AddressOperationType(String displayName) {
+        this.displayName = displayName;
     }
 }

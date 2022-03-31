@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface UserRepository {
     UserEntity saveUser(UserEntity userDto);
-    Optional<UserEntity> getUserById(long id);
+    Optional<UserWithNumberEntity> getUserWithNumbersById(long id);
     List<UserWithNumberEntity> getUsersByFilters(String partOfName, String partOfNumber);
     UserEntity updateUser(UserEntity userEntity);
     int deleteUserById(long id);

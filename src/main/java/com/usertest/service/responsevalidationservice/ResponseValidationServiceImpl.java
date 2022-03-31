@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ResponseValidationServiceImpl implements ResponseValidationService {
     @Override
-    public void checkStatusResponseEntity(ResponseEntity responseEntity, AddressOperationType operationType) {
+    public void throwIfResponseEntityNotValid(ResponseEntity responseEntity, AddressOperationType operationType) {
         int statusCode = responseEntity.getStatusCodeValue();
         boolean isStatusCodeCorrect = statusCode >= HttpStatus.OK.value()
                 && statusCode <HttpStatus.MULTIPLE_CHOICES.value();
@@ -22,7 +22,7 @@ public class ResponseValidationServiceImpl implements ResponseValidationService 
     }
 
     @Override
-    public void checkStatusResponseDto(ResponseDto dto, AddressOperationType operationType) {
+    public void throwIfStatusResponseDtoNotValid(ResponseDto dto, AddressOperationType operationType) {
         Status status = dto.getStatus();
         if (status != Status.OK) {
             throw new IncorrectStatusDto("Incorrect response dto status on operation "

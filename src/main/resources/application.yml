@@ -3,3 +3,6 @@ spring:
     username: sa
     password: upitec
     url: jdbc:sqlserver://172.21.10.79:1433;DatabaseName=Serafym_1
+
+address-service:
+  url: "http://localhost:8888/address"

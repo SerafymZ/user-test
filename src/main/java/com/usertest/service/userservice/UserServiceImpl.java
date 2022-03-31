@@ -1,12 +1,9 @@
 package com.usertest.service.userservice;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.usertest.dto.AddressDto;
 import com.usertest.dto.UserDto;
-import com.usertest.dto.basedto.ResponseDto;
 import com.usertest.entity.UserEntity;
 import com.usertest.entity.UserWithNumberEntity;
-import com.usertest.exception.NotFoundNumberException;
 import com.usertest.exception.NotFoundUserException;
 import com.usertest.mapper.UserMapper;
 import com.usertest.repository.NumberRepository;
@@ -16,7 +13,6 @@ import com.usertest.service.userdtovalidationservice.UserDtoValidationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.ResourceAccessException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,10 +22,7 @@ import java.util.List;
 @Service
 public class UserServiceImpl implements UserService {
 
-    private static final String NOT_FOUND_USER_MESSAGE_PART_1 = "There is no user with ID = ";
-    private static final String NOT_FOUND_USER_MESSAGE_PART_2 = " in database.";
-    private static final String NOT_FOUND_NUMBER_MESSAGE_PART_1 = "There is no numbers with user ID = ";
-    private static final String NOT_FOUND_NUMBER_MESSAGE_PART_2 = " in database.";
+    private static final String NOT_FOUND_USER_MESSAGE = "There is no user with ID = %d in database.";
 
     private final AddressRestService addressRestService;
 
@@ -42,27 +35,27 @@ public class UserServiceImpl implements UserService {
     private final UserDtoValidationService userDtoValidationService;
 
     @Override
-    public UserDto getUserById(long id) throws ResourceAccessException, JsonProcessingException {
-        UserEntity userEntity = userRepository.getUserById(id).orElseThrow(() ->
-                new NotFoundUserException(NOT_FOUND_USER_MESSAGE_PART_1 + id + NOT_FOUND_USER_MESSAGE_PART_2));
-        ResponseDto<AddressDto> responseAddressDto = addressRestService.getAddressById(userEntity.getAddressId());
-        List<String> numberEntitiesList = numberRepository.getNumbersByUserId(id);
-        return userMapper.toUserDto(userEntity, numberEntitiesList, responseAddressDto.getData());
+    public UserDto getUserById(long id)  {
+       UserWithNumberEntity userWithNumbersEntity = userRepository.getUserWithNumbersById(id).orElseThrow(() ->
+                new NotFoundUserException(String.format(NOT_FOUND_USER_MESSAGE, id)));
+
+        AddressDto responseAddressDto = addressRestService.getAddressById(userWithNumbersEntity.getAddressId());
+        return userMapper.toUserDto(userWithNumbersEntity, responseAddressDto);
     }
 
     @Override
-    public List<UserDto> getUsersByFilters(String partOfName, String partOfNumber)
-            throws ResourceAccessException, JsonProcessingException {
+    public List<UserDto> getUsersByFilters(String partOfName, String partOfNumber) {
         List<UserWithNumberEntity> userEntities = userRepository.getUsersByFilters(partOfName, partOfNumber);
         HashMap<Long, UserDto> usersMap = new HashMap<>();
         for(UserWithNumberEntity entity : userEntities) {
-            ResponseDto<AddressDto> addressDto = addressRestService.getAddressById(entity.getAddressId());
-            if (usersMap.containsKey(entity.getId())) {
-                UserDto userDto = usersMap.get(entity.getId());
-                userDto.getNumbers().add(entity.getNumber());
-            } else {
-                var userDto = userMapper.toUserDto(entity, addressDto.getData());
-                usersMap.put(entity.getId(), userDto);
+            AddressDto addressDto = null;
+            if (entity.getAddressId() != null) {
+                addressDto = addressRestService.getAddressById(entity.getAddressId());
+            }
+            var userDto = userMapper.toUserDto(entity, addressDto);
+            var userDtoFromMap = usersMap.putIfAbsent(entity.getId(), userDto);
+            if(userDtoFromMap != null) {
+                userDtoFromMap.getNumbers().add(entity.getNumber());
             }
         }
         return new ArrayList<>(usersMap.values());
@@ -70,67 +63,51 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public UserDto saveUser(UserDto userDto) throws ResourceAccessException,JsonProcessingException {
+    public UserDto saveUser(UserDto userDto) {
         userDtoValidationService.validate(userDto);
         var addressDto = new AddressDto();
         addressDto.setAddress(userDto.getAddress());
-        ResponseDto<AddressDto> responseAddressDto = addressRestService.findOrInsertAddress(addressDto);
+        AddressDto resultAddressDto = addressRestService.findOrInsertAddress(addressDto);
         UserEntity userEntity = userRepository.saveUser(
-                userMapper.toUserEntity(userDto, responseAddressDto.getData().getId())
+                userMapper.toUserEntity(userDto, resultAddressDto.getId())
         );
         numberRepository.saveNumbersList(userDto.getNumbers(), userEntity.getId());
-        return userMapper.toUserDto(userEntity, userDto.getNumbers(), responseAddressDto.getData());
+        return userMapper.toUserDto(userEntity, userDto.getNumbers(), resultAddressDto);
     }
 
     @Transactional
     @Override
-    public UserDto updateUser(long userId, UserDto userDto) throws ResourceAccessException, JsonProcessingException {
+    public UserDto updateUser(long userId, UserDto userDto) {
         userDto.setId(userId);
         userDtoValidationService.validate(userDto);
+        userRepository.getUserWithNumbersById(userId).orElseThrow(() ->
+                new NotFoundUserException(String.format(NOT_FOUND_USER_MESSAGE, userId)));
+
         var addressDto = new AddressDto();
         addressDto.setAddress(userDto.getAddress());
-        userRepository.getUserById(userId).orElseThrow(() ->
-                new NotFoundUserException(NOT_FOUND_USER_MESSAGE_PART_1 + userId + NOT_FOUND_USER_MESSAGE_PART_2));
-        ResponseDto<AddressDto> addressResult = addressRestService.findOrInsertAddress(addressDto);
+        AddressDto resultAddressDto = addressRestService.findOrInsertAddress(addressDto);
 
         UserEntity userEntity = userRepository.updateUser(
-                userMapper.toUserEntity(userDto, addressResult.getData().getId())
+                userMapper.toUserEntity(userDto, resultAddressDto.getId())
         );
-        List<String> existNumbers = numberRepository.getNumbersByUserId(userId);
-        if(existNumbers != null && !existNumbers.isEmpty()) {
-            int deleteNumbersResult = numberRepository.deleteNumbersByUserId(userId);
-            if (deleteNumbersResult == 0) {
-                throw new NotFoundNumberException(
-                        NOT_FOUND_NUMBER_MESSAGE_PART_1 + userId + NOT_FOUND_NUMBER_MESSAGE_PART_2
-                );
-            }
-        }
-        if (userDto.getNumbers() != null && !userDto.getNumbers().isEmpty()) {
-            numberRepository.saveNumbersList(userDto.getNumbers(), userId);
-        }
 
-        return userMapper.toUserDto(userEntity, userDto.getNumbers(), addressResult.getData());
+        numberRepository.deleteNumbersByUserId(userId);
+        numberRepository.saveNumbersList(userDto.getNumbers(), userId);
+
+        return userMapper.toUserDto(userEntity, userDto.getNumbers(), resultAddressDto);
     }
 
     @Transactional
     @Override
-    public int deleteUserById(long userId) throws ResourceAccessException, JsonProcessingException {
-        UserEntity userDto = userRepository.getUserById(userId).orElseThrow(() ->
-                new NotFoundUserException(NOT_FOUND_USER_MESSAGE_PART_1 + userId + NOT_FOUND_USER_MESSAGE_PART_2));
-        int result = userRepository.deleteUserById(userId);
-        if (result == 0) {
-            throw new NotFoundUserException(NOT_FOUND_USER_MESSAGE_PART_1 + userId + NOT_FOUND_USER_MESSAGE_PART_2);
-        }
+    public int deleteUserById(long userId) {
+        UserWithNumberEntity userWithNumberEntity = userRepository.getUserWithNumbersById(userId).orElseThrow(() ->
+                new NotFoundUserException(String.format(NOT_FOUND_USER_MESSAGE, userId)));
         List<String> existNumbers = numberRepository.getNumbersByUserId(userId);
         if (existNumbers != null && !existNumbers.isEmpty()) {
-            int deleteNumbersResult = numberRepository.deleteNumbersByUserId(userId);
-            if (deleteNumbersResult == 0) {
-                throw new NotFoundNumberException(
-                        NOT_FOUND_NUMBER_MESSAGE_PART_1 + userId + NOT_FOUND_NUMBER_MESSAGE_PART_2
-                );
-            }
+            numberRepository.deleteNumbersByUserId(userId);
         }
-        Long addressId = userDto.getAddressId();
+        int result = userRepository.deleteUserById(userId);
+        Long addressId = userWithNumberEntity.getAddressId();
         if(addressId != null && userRepository.addressUsersCount(addressId) == 0) {
             addressRestService.deleteAddressById(addressId);
         }

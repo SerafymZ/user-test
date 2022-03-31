@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.Arrays;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -14,7 +15,7 @@ public class NumberRepositoryImpl implements NumberRepository{
     private final NamedParameterJdbcTemplate namedJdbcTemplate;
 
     @Override
-    public int[] saveNumbersList(List<String> numbers, long userId) {
+    public int saveNumbersList(List<String> numbers, long userId) {
         var sql = "INSERT INTO number (number, user_id) VALUES " +
                 "(:number, :user_id)";
 
@@ -24,7 +25,7 @@ public class NumberRepositoryImpl implements NumberRepository{
                         .addValue("user_id", userId))
                 .toArray(MapSqlParameterSource[]::new);
 
-        return namedJdbcTemplate.batchUpdate(sql, sqlParametersSource);
+        return Arrays.stream(namedJdbcTemplate.batchUpdate(sql, sqlParametersSource)).sum();
     }
 
     @Override
