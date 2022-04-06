@@ -1,13 +1,11 @@
 package com.usertest.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.usertest.dto.UserDto;
 import com.usertest.dto.basedto.ResponseDto;
 import com.usertest.service.userservice.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.ResourceAccessException;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
@@ -23,8 +21,7 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/{id}")
-    public ResponseDto<UserDto> getUserById(@PathVariable @Min(1) Long id)
-            throws ResourceAccessException, JsonProcessingException {
+    public ResponseDto<UserDto> getUserById(@PathVariable @Min(1) Long id) {
         UserDto userResult = userService.getUserById(id);
         return new ResponseDto<>(userResult);
     }
