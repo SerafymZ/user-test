@@ -21,6 +21,8 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation "org.hibernate.validator:hibernate-validator"
+	implementation "javax.validation:validation-api"
 	implementation 'org.flywaydb:flyway-core'
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.microsoft.sqlserver:mssql-jdbc'

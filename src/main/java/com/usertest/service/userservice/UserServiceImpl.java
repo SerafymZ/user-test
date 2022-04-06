@@ -9,7 +9,6 @@ import com.usertest.mapper.UserMapper;
 import com.usertest.repository.NumberRepository;
 import com.usertest.repository.UserRepository;
 import com.usertest.service.addressrestservice.AddressRestService;
-import com.usertest.service.userdtovalidationservice.UserDtoValidationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,8 +30,6 @@ public class UserServiceImpl implements UserService {
     private final NumberRepository numberRepository;
 
     private final UserMapper userMapper;
-
-    private final UserDtoValidationService userDtoValidationService;
 
     @Override
     public UserDto getUserById(long id)  {
@@ -64,7 +61,9 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public UserDto saveUser(UserDto userDto) {
-        userDtoValidationService.validate(userDto);
+        if (userDto == null) {
+            throw new NullPointerException("User dto is NULL.");
+        }
         var addressDto = new AddressDto();
         addressDto.setAddress(userDto.getAddress());
         AddressDto resultAddressDto = addressRestService.findOrInsertAddress(addressDto);
@@ -79,7 +78,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto updateUser(long userId, UserDto userDto) {
         userDto.setId(userId);
-        userDtoValidationService.validate(userDto);
+
+        if (userDto == null) {
+            throw new NullPointerException("User dto is NULL.");
+        }
         userRepository.getUserWithNumbersById(userId).orElseThrow(() ->
                 new NotFoundUserException(String.format(NOT_FOUND_USER_MESSAGE, userId)));
 

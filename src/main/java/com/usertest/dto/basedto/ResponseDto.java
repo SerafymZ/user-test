@@ -4,6 +4,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 
 @Data
 @NoArgsConstructor
@@ -24,6 +26,15 @@ public class ResponseDto<T> extends BaseResponseDto{
     public static <T> ResponseDto<T> failedResponseDto(T data) {
         var responseDto = new ResponseDto<>(data);
         responseDto.setStatus(Status.Failed);
+
+        return responseDto;
+    }
+
+    public static <T> ResponseDto<T> failedResponseDto(List<ErrorDto> errors) {
+
+        var responseDto = new ResponseDto();
+        responseDto.setStatus(Status.Failed);
+        responseDto.setErrors(errors);
 
         return responseDto;
     }
