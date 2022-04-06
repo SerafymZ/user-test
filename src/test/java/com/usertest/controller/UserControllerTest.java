@@ -77,7 +77,9 @@ class UserControllerTest {
 
         //when
         mockMvc.perform(
-                get("/user?partOfName=son&partOfNumber=12"))
+                get("/user/")
+                        .queryParam("partOfName", partOfName)
+                        .queryParam("partOfNumber", partOfNumber))
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(ResponseDto.okResponseDto(userList))));
 
