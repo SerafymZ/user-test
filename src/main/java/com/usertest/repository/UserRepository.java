@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository {
-    UserEntity saveUser(UserEntity userDto);
+    UserEntity saveUser(UserEntity userEntity);
     Optional<UserWithNumberEntity> getUserWithNumbersById(long id);
     List<UserWithNumberEntity> getUsersByFilters(String partOfName, String partOfNumber);
     UserEntity updateUser(UserEntity userEntity);
