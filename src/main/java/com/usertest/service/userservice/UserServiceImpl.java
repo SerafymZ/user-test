@@ -14,8 +14,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -37,7 +39,9 @@ public class UserServiceImpl implements UserService {
                 new NotFoundUserException(String.format(NOT_FOUND_USER_MESSAGE, id)));
 
         AddressDto responseAddressDto = addressRestService.getAddressById(userWithNumbersEntity.getAddressId());
-        return userMapper.toUserDto(userWithNumbersEntity, responseAddressDto);
+        List<String> numbers = Arrays.stream(userWithNumbersEntity.getNumber().split(","))
+                .collect(Collectors.toList());
+        return userMapper.toUserDto(userWithNumbersEntity, numbers, responseAddressDto);
     }
 
     @Override
@@ -49,7 +53,9 @@ public class UserServiceImpl implements UserService {
             if (entity.getAddressId() != null) {
                 addressDto = addressRestService.getAddressById(entity.getAddressId());
             }
-            var userDto = userMapper.toUserDto(entity, addressDto);
+            List<String> numbers = Arrays.stream(entity.getNumber().split(","))
+                    .collect(Collectors.toList());
+            var userDto = userMapper.toUserDto(entity, numbers, addressDto);
             var userDtoFromMap = usersMap.putIfAbsent(entity.getId(), userDto);
             if(userDtoFromMap != null) {
                 userDtoFromMap.getNumbers().add(entity.getNumber());
