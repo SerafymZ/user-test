@@ -70,8 +70,9 @@ public class UserServiceImpl implements UserService {
         if (userDto == null) {
             throw new NullPointerException("User dto is NULL.");
         }
-        var addressDto = new AddressDto();
-        addressDto.setAddress(userDto.getAddress());
+        var addressDto = AddressDto.builder()
+                .address(userDto.getAddress())
+                .build();
         AddressDto resultAddressDto = addressRestService.findOrInsertAddress(addressDto);
         UserEntity userEntity = userRepository.saveUser(
                 userMapper.toUserEntity(userDto, resultAddressDto.getId())
@@ -91,8 +92,9 @@ public class UserServiceImpl implements UserService {
         userRepository.getUserWithNumbersById(userId).orElseThrow(() ->
                 new NotFoundUserException(String.format(NOT_FOUND_USER_MESSAGE, userId)));
 
-        var addressDto = new AddressDto();
-        addressDto.setAddress(userDto.getAddress());
+        var addressDto = AddressDto.builder()
+                .address(userDto.getAddress())
+                .build();
         AddressDto resultAddressDto = addressRestService.findOrInsertAddress(addressDto);
 
         UserEntity userEntity = userRepository.updateUser(

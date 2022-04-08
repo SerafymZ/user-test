@@ -183,8 +183,9 @@ class UserServiceImplTest {
     @Test
     void saveUser_shouldBeReturnedUserDtoSuccessfully() {
         //given
-        var addressDtoWithoutId = new AddressDto();
-        addressDtoWithoutId.setAddress(ADDRESS);
+        var addressDtoWithoutId = AddressDto.builder()
+                .address(ADDRESS)
+                .build();
         var addressDto = createAddressDto();
         when(addressRestService.findOrInsertAddress(addressDtoWithoutId)).thenReturn(addressDto);
         var userDto = createUserDto();
@@ -231,8 +232,9 @@ class UserServiceImplTest {
         var userWithNumberEntity = createUserWithNumberEntity();
         when(userRepository.getUserWithNumbersById(ID)).thenReturn(Optional.of(userWithNumberEntity));
         var addressDto = createAddressDto();
-        var addressDtoWithoutId = new AddressDto();
-        addressDtoWithoutId.setAddress(ADDRESS);
+        var addressDtoWithoutId = AddressDto.builder()
+                .address(ADDRESS)
+                .build();
         when(addressRestService.findOrInsertAddress(addressDtoWithoutId)).thenReturn(addressDto);
         var userDto = createUserDto();
         var userEntity = createUserEntity();
@@ -325,30 +327,30 @@ class UserServiceImplTest {
     }
 
     private UserWithNumberEntity createUserWithNumberEntity() {
-        var userWithNumberEntity = new UserWithNumberEntity();
-        userWithNumberEntity.setId(1L);
-        userWithNumberEntity.setName(NAME);
-        userWithNumberEntity.setAge(AGE);
-        userWithNumberEntity.setNumber(NUMBERS_LINE);
-        userWithNumberEntity.setAddressId(ADDRESS_ID);
-        return userWithNumberEntity;
+        return UserWithNumberEntity.builder()
+                .id(ID)
+                .name(NAME)
+                .age(AGE)
+                .number(NUMBERS_LINE)
+                .addressId(ADDRESS_ID)
+                .build();
     }
 
     private AddressDto createAddressDto() {
-        var addressDto = new AddressDto();
-        addressDto.setId(ADDRESS_ID);
-        addressDto.setAddress(ADDRESS);
-        return addressDto;
+        return AddressDto.builder()
+                .id(ADDRESS_ID)
+                .address(ADDRESS)
+                .build();
     }
 
     private UserDto createUserDto() {
-        var userDto = new UserDto();
-        userDto.setId(ID);
-        userDto.setName(NAME);
-        userDto.setAge(AGE);
-        userDto.setNumbers(NUMBERS);
-        userDto.setAddress(ADDRESS);
-        return userDto;
+        return UserDto.builder()
+                .id(ID)
+                .name(NAME)
+                .age(AGE)
+                .numbers(NUMBERS)
+                .address(ADDRESS)
+                .build();
     }
 
     private UserEntity createUserEntity() {

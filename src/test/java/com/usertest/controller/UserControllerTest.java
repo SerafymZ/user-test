@@ -65,12 +65,13 @@ class UserControllerTest {
         var userDto = createUserDto();
         userDto.setId(ID);
 
-        var anotherUserDto = new UserDto();
-        userDto.setId(anotherId);
-        userDto.setName("Peterson");
-        userDto.setAge(35);
-        userDto.setNumbers(List.of("+654321", "+123456"));
-        userDto.setAddress("Mexico");
+        var anotherUserDto = UserDto.builder()
+                .id(anotherId)
+                .name("Peterson")
+                .age(35)
+                .numbers(List.of("+654321", "+123456"))
+                .address("Mexico")
+                .build();
 
         var userList = List.of(userDto, anotherUserDto);
         when(userService.getUsersByFilters(partOfName, partOfNumber)).thenReturn(userList);
@@ -114,12 +115,13 @@ class UserControllerTest {
         //given
         var userDto = createUserDto();
 
-        var resultUserDto = new UserDto();
-        userDto.setId(ID);
-        userDto.setName("Peterson");
-        userDto.setAge(35);
-        userDto.setNumbers(List.of("+654321", "+123456"));
-        userDto.setAddress("Mexico");
+        var resultUserDto = UserDto.builder()
+                .id(ID)
+                .name("Peterson")
+                .age(35)
+                .numbers(List.of("+654321", "+123456"))
+                .address("Mexico")
+                .build();
 
         when(userService.updateUser(ID, userDto)).thenReturn(resultUserDto);
 
@@ -151,11 +153,11 @@ class UserControllerTest {
     }
 
     private UserDto createUserDto() {
-        var userDto = new UserDto();
-        userDto.setName(NAME);
-        userDto.setAge(30);
-        userDto.setNumbers(NUMBERS);
-        userDto.setAddress(ADDRESS);
-        return userDto;
+        return UserDto.builder()
+                .name(NAME)
+                .age(30)
+                .numbers(NUMBERS)
+                .address(ADDRESS)
+                .build();
     }
 }

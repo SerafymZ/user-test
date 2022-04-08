@@ -9,6 +9,7 @@ import javax.validation.constraints.Size;
 import java.util.List;
 
 @Data
+@Builder
 public class UserDto {
     private Long id;
 
