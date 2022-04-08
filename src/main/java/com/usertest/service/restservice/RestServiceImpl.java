@@ -27,7 +27,7 @@ public class RestServiceImpl implements RestService {
                     String.class
             );
         } catch (RestClientResponseException exception) {
-            return new ResponseEntity(ResponseDto.failedResponseDto(exception.getMessage()), HttpStatus.NOT_ACCEPTABLE);
+            return new ResponseEntity(ResponseDto.failedResponseDto(exception.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -41,7 +41,7 @@ public class RestServiceImpl implements RestService {
                     String.class
             );
         } catch (RestClientResponseException exception) {
-            return new ResponseEntity(ResponseDto.failedResponseDto(exception.getMessage()), HttpStatus.NOT_ACCEPTABLE);
+            return new ResponseEntity(ResponseDto.failedResponseDto(exception.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -55,7 +55,7 @@ public class RestServiceImpl implements RestService {
                     String.class
             );
         } catch (RestClientResponseException exception) {
-            return new ResponseEntity(ResponseDto.failedResponseDto(exception.getMessage()), HttpStatus.NOT_ACCEPTABLE);
+            return new ResponseEntity(ResponseDto.failedResponseDto(exception.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 }
