@@ -211,7 +211,7 @@ class UserServiceImplTest {
     @Test
     void updateUser() {
         //when
-        assertThatThrownBy(() -> userService.updateUser(ID, null));
+        assertThatThrownBy(() -> userService.updateUser(ID, null)).isInstanceOf(NullPointerException.class);
     }
 
     @Test

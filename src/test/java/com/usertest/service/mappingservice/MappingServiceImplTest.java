@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.usertest.dto.AddressDto;
 import com.usertest.dto.basedto.ResponseDto;
+import com.usertest.exception.MappingException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,7 +13,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest(classes = MappingServiceImpl.class)
@@ -29,27 +29,23 @@ class MappingServiceImplTest {
     ObjectMapper objectMapper;
 
     @Test
-    void readAddressDto_() throws JsonProcessingException {
+    void readAddressDto_shouldBeThrewJsonProcessingException() throws JsonProcessingException {
         //given
-        var addressDto = createAddressDto();
-        var expectedResult = ResponseDto.okResponseDto(addressDto);
-        var typeReference = new TypeReference<ResponseDto<AddressDto>>() {};
-        doThrow(JsonProcessingException.class).when(objectMapper).readValue(BODY, typeReference);
+        doThrow(JsonProcessingException.class).when(objectMapper).readValue(anyString(), isA(TypeReference.class));
 
         //when
-        assertThatThrownBy(() -> mappingService.readAddressDto(BODY)).isInstanceOf(JsonProcessingException.class);
+        assertThatThrownBy(() -> mappingService.readAddressDto(BODY)).isInstanceOf(MappingException.class);
 
         //then
-        verify(objectMapper, times(1)).readValue(BODY, typeReference);
+        verify(objectMapper, times(1)).readValue(anyString(), isA(TypeReference.class));
     }
 
     @Test
-    void readAddressDto() throws JsonProcessingException {
+    void readAddressDto_shouldBeReadValueSuccessful() throws JsonProcessingException {
         //given
         var addressDto = createAddressDto();
         var expectedResult = ResponseDto.okResponseDto(addressDto);
-        var typeReference = new TypeReference<ResponseDto<AddressDto>>() {};
-        when(objectMapper.readValue(BODY, typeReference)).thenReturn(expectedResult);
+        when(objectMapper.readValue(anyString(), isA(TypeReference.class))).thenReturn(expectedResult);
 
         //when
         var actualResult = mappingService.readAddressDto(BODY);
@@ -57,11 +53,35 @@ class MappingServiceImplTest {
         //then
         assertThat(actualResult).isEqualTo(expectedResult);
 
-        verify(objectMapper, times(1)).readValue(BODY, typeReference);
+        verify(objectMapper, times(1)).readValue(anyString(), isA(TypeReference.class));
     }
 
     @Test
-    void readInteger() {
+    void readInteger() throws JsonProcessingException {
+        //given
+        doThrow(JsonProcessingException.class).when(objectMapper).readValue(anyString(), isA(TypeReference.class));
+
+        //when
+        assertThatThrownBy(() -> mappingService.readInteger(BODY)).isInstanceOf(MappingException.class);
+
+        //then
+        verify(objectMapper, times(1)).readValue(anyString(), isA(TypeReference.class));
+    }
+
+    @Test
+    void readInteger_() throws JsonProcessingException {
+        //given
+        var result = 1;
+        var expectedResult = ResponseDto.okResponseDto(result);
+        when(objectMapper.readValue(anyString(), isA(TypeReference.class))).thenReturn(expectedResult);
+
+        //when
+        var actualResult = mappingService.readInteger(BODY);
+
+        //then
+        assertThat(actualResult).isEqualTo(expectedResult);
+
+        verify(objectMapper, times(1)).readValue(anyString(), isA(TypeReference.class));
     }
 
     private AddressDto createAddressDto() {
