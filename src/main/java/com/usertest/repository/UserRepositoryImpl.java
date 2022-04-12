@@ -33,7 +33,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Optional<UserWithNumberEntity> getUserWithNumbersById(long id) {
-        var sql = "  SELECT u.id AS userId, u.name AS name, u.age AS age, string_agg(n.number, ',') AS number, u.address_id AS address_id FROM \n" +
+        var sql = "  SELECT u.id AS id, u.name AS name, u.age AS age, string_agg(n.number, ',') AS number, u.address_id AS address_id FROM \n" +
                 "  [user] AS u JOIN number AS n ON u.id = n.user_id\n" +
                 "  WHERE u.id = :userId\n" +
                 "  GROUP BY u.id, name, age, address_id";
