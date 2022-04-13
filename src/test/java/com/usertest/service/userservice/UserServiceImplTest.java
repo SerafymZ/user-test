@@ -126,8 +126,7 @@ class UserServiceImplTest {
         var actualResult = userService.getUsersByFilters(partOfName, partOfNumber);
 
         //then
-        var expectedResult = List.of(userDto);
-        assertThat(actualResult).isEqualTo(expectedResult);
+        assertThat(actualResult).isEqualTo(List.of(userDto));
 
         verify(userRepository, times(1)).getUsersByFilters(partOfName, partOfNumber);
         verify(addressRestService, never()).getAddressById(0L);
@@ -163,8 +162,7 @@ class UserServiceImplTest {
         //then
         var resultUserDto = createUserDto();
         resultUserDto.setNumbers(new ArrayList<>(Arrays.asList("11111", "22211")));
-        var expectedResult = List.of(resultUserDto);
-        assertThat(actualResult).isEqualTo(expectedResult);
+        assertThat(actualResult).isEqualTo(List.of(resultUserDto));
 
         verify(userRepository, times(1)).getUsersByFilters(partOfName, partOfNumber);
         var iterationsCount = 2;
