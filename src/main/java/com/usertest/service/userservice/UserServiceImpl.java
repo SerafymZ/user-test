@@ -67,9 +67,6 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public UserDto saveUser(UserDto userDto) {
-        if (userDto == null) {
-            throw new NullPointerException("User dto is NULL.");
-        }
         var addressDto = new AddressDto(null, userDto.getAddress());
         AddressDto resultAddressDto = addressRestService.findOrInsertAddress(addressDto);
         UserEntity userEntity = userRepository.saveUser(
@@ -83,10 +80,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto updateUser(long userId, UserDto userDto) {
         userDto.setId(userId);
-
-        if (userDto == null) {
-            throw new NullPointerException("User dto is NULL.");
-        }
         userRepository.getUserWithNumbersById(userId).orElseThrow(() ->
                 new NotFoundUserException(String.format(NOT_FOUND_USER_MESSAGE, userId)));
 

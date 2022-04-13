@@ -34,11 +34,6 @@ public class UserExceptionHandler {
     }
 
     @ExceptionHandler
-    public ResponseEntity<ResponseDto<String>> handleException(NullPointerException exception) {
-        return new ResponseEntity<>(ResponseDto.failedResponseDto(exception.getMessage()), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler
     public ResponseEntity<ResponseDto<String>> handleException(MappingException exception) {
         return new ResponseEntity<>(ResponseDto.failedResponseDto(exception.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }

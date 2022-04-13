@@ -173,12 +173,6 @@ class UserServiceImplTest {
     }
 
     @Test
-    void saveUser_shouldBeThrewNullPointerException() {
-        //when
-        assertThatThrownBy(() -> userService.saveUser(null)).isInstanceOf(NullPointerException.class);
-    }
-
-    @Test
     void saveUser_shouldBeReturnedUserDtoSuccessfully() {
         //given
         var addressDtoWithoutId = new AddressDto(null, ADDRESS);
@@ -202,12 +196,6 @@ class UserServiceImplTest {
         verify(userRepository, times(1)).saveUser(userEntity);
         verify(numberRepository, times(1)).saveNumbersList(NUMBERS, ID);
         verify(userMapper, times(1)).toUserDto(userEntity, NUMBERS, addressDto);
-    }
-
-    @Test
-    void updateUser() {
-        //when
-        assertThatThrownBy(() -> userService.updateUser(ID, null)).isInstanceOf(NullPointerException.class);
     }
 
     @Test

@@ -100,8 +100,6 @@ class UserControllerIntegrationTest {
                 .andExpect(content().json(objectMapper.writeValueAsString(ResponseDto.okResponseDto(expectedUserDto))));
 
         //then
-        assertThat(countRowsInTable(jdbcTemplate, "[user]")).isEqualTo(1);
-        assertThat(countRowsInTable(jdbcTemplate, "number")).isEqualTo(1);
     }
 
     @Test
@@ -137,9 +135,6 @@ class UserControllerIntegrationTest {
                 .andExpect(content().json(objectMapper.writeValueAsString(ResponseDto.okResponseDto(List.of(userDto)))));
 
         //then
-
-        assertThat(countRowsInTable(jdbcTemplate, "[user]")).isEqualTo(2);
-        assertThat(countRowsInTable(jdbcTemplate, "number")).isEqualTo(userDto.getNumbers().size() + userDto2.getNumbers().size());
     }
 
     @Test
