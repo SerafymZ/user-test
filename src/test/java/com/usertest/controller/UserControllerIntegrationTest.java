@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.jdbc.JdbcTestUtils.countRowsInTable;
 import static org.springframework.test.jdbc.JdbcTestUtils.deleteFromTables;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -95,6 +95,7 @@ class UserControllerIntegrationTest {
                 .andExpect(content().json(objectMapper.writeValueAsString(ResponseDto.okResponseDto(expectedUserDto))));
 
         //then
+        verify(restService, times(1)).sendGet(url, httpEntity);
     }
 
     @Sql("/sql/test_data/get_users_by_filters_test_data.sql")
@@ -124,6 +125,7 @@ class UserControllerIntegrationTest {
                 .andExpect(content().json(objectMapper.writeValueAsString(ResponseDto.okResponseDto(List.of(userDto)))));
 
         //then
+        verify(restService, times(1)).sendGet(url, httpEntity);
     }
 
     @Test
@@ -155,6 +157,8 @@ class UserControllerIntegrationTest {
         //then
         assertThat(countRowsInTable(jdbcTemplate, "[user]")).isEqualTo(1);
         assertThat(countRowsInTable(jdbcTemplate, "number")).isEqualTo(1);
+
+        verify(restService, times(1)).sendPost(url, httpEntity);
     }
 
     @Sql("/sql/test_data/save_one_user_on_db.sql")
@@ -199,6 +203,8 @@ class UserControllerIntegrationTest {
         //then
         assertThat(countRowsInTable(jdbcTemplate, "[user]")).isEqualTo(1);
         assertThat(countRowsInTable(jdbcTemplate, "number")).isEqualTo(updatedUserDto.getNumbers().size());
+
+        verify(restService, times(1)).sendPost(url, httpEntity);
     }
 
     @Sql("/sql/test_data/save_one_user_on_db.sql")
@@ -225,6 +231,8 @@ class UserControllerIntegrationTest {
         //then
         assertThat(countRowsInTable(jdbcTemplate, "[user]")).isZero();
         assertThat(countRowsInTable(jdbcTemplate, "number")).isZero();
+
+        verify(restService, times(1)).sendDelete(url, httpEntity);
     }
 
     private UserDto createUserDto() {
