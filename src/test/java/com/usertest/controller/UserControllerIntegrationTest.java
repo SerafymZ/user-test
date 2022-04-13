@@ -21,7 +21,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +30,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.jdbc.JdbcTestUtils.countRowsInTable;
+import static org.springframework.test.jdbc.JdbcTestUtils.deleteFromTables;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -74,15 +75,15 @@ class UserControllerIntegrationTest {
 
     @AfterEach
     void clearDb() {
-        JdbcTestUtils.deleteFromTables(jdbcTemplate, "number");
-        JdbcTestUtils.deleteFromTables(jdbcTemplate, "[user]");
+        deleteFromTables(jdbcTemplate, "number");
+        deleteFromTables(jdbcTemplate, "[user]");
     }
 
     @Test
     void getUserById() throws Exception {
         //given
-        var usersCount = JdbcTestUtils.countRowsInTable(jdbcTemplate, "[user]");
-        var numbersCount = JdbcTestUtils.countRowsInTable(jdbcTemplate, "number");
+        var usersCount = countRowsInTable(jdbcTemplate, "[user]");
+        var numbersCount = countRowsInTable(jdbcTemplate, "number");
         assertThat(usersCount).isZero();
         assertThat(numbersCount).isZero();
 
@@ -101,8 +102,8 @@ class UserControllerIntegrationTest {
                 .andExpect(content().json(objectMapper.writeValueAsString(ResponseDto.okResponseDto(expectedUserDto))));
 
         //then
-        usersCount = JdbcTestUtils.countRowsInTable(jdbcTemplate, "[user]");
-        numbersCount = JdbcTestUtils.countRowsInTable(jdbcTemplate, "number");
+        usersCount = countRowsInTable(jdbcTemplate, "[user]");
+        numbersCount = countRowsInTable(jdbcTemplate, "number");
         assertThat(usersCount).isEqualTo(1);
         assertThat(numbersCount).isEqualTo(1);
     }
@@ -110,8 +111,8 @@ class UserControllerIntegrationTest {
     @Test
     void getUsersByFilters() throws Exception {
         //given
-        var usersCount = JdbcTestUtils.countRowsInTable(jdbcTemplate, "[user]");
-        var numbersCount = JdbcTestUtils.countRowsInTable(jdbcTemplate, "number");
+        var usersCount = countRowsInTable(jdbcTemplate, "[user]");
+        var numbersCount = countRowsInTable(jdbcTemplate, "number");
         assertThat(usersCount).isZero();
         assertThat(numbersCount).isZero();
 
@@ -125,7 +126,7 @@ class UserControllerIntegrationTest {
                 .numbers(List.of("111111", "22222"))
                 .address("London")
                 .build();
-       saveUserDtoInDb(userDto2, 2L, "London");
+        saveUserDtoInDb(userDto2, 2L, "London");
 
         var responseEntityResult
                 = ResponseEntity.ok("{\"status\":\"OK\",\"errors\":null,\"data\":{\"id\":1,\"address\":\"Canada\"}}");
@@ -142,8 +143,8 @@ class UserControllerIntegrationTest {
                 .andExpect(content().json(objectMapper.writeValueAsString(ResponseDto.okResponseDto(List.of(userDto)))));
 
         //then
-        usersCount = JdbcTestUtils.countRowsInTable(jdbcTemplate, "[user]");
-        numbersCount = JdbcTestUtils.countRowsInTable(jdbcTemplate, "number");
+        usersCount = countRowsInTable(jdbcTemplate, "[user]");
+        numbersCount = countRowsInTable(jdbcTemplate, "number");
         assertThat(usersCount).isEqualTo(2);
         assertThat(numbersCount).isEqualTo(userDto.getNumbers().size() + userDto2.getNumbers().size());
     }
@@ -152,8 +153,8 @@ class UserControllerIntegrationTest {
     @Transactional
     void saveUser() throws Exception {
         //given
-        var usersCount = JdbcTestUtils.countRowsInTable(jdbcTemplate, "[user]");
-        var numbersCount = JdbcTestUtils.countRowsInTable(jdbcTemplate, "number");
+        var usersCount = countRowsInTable(jdbcTemplate, "[user]");
+        var numbersCount = countRowsInTable(jdbcTemplate, "number");
         assertThat(usersCount).isZero();
         assertThat(numbersCount).isZero();
 
@@ -174,8 +175,8 @@ class UserControllerIntegrationTest {
                 .andExpect(jsonPath("$.data.address").value("Canada"));
 
         //then
-        usersCount = JdbcTestUtils.countRowsInTable(jdbcTemplate, "[user]");
-        numbersCount = JdbcTestUtils.countRowsInTable(jdbcTemplate, "number");
+        usersCount = countRowsInTable(jdbcTemplate, "[user]");
+        numbersCount = countRowsInTable(jdbcTemplate, "number");
         assertThat(usersCount).isEqualTo(1);
         assertThat(numbersCount).isEqualTo(1);
     }
@@ -184,8 +185,8 @@ class UserControllerIntegrationTest {
     @Transactional
     void updateUser() throws Exception {
         //given
-        var usersCount = JdbcTestUtils.countRowsInTable(jdbcTemplate, "[user]");
-        var numbersCount = JdbcTestUtils.countRowsInTable(jdbcTemplate, "number");
+        var usersCount = countRowsInTable(jdbcTemplate, "[user]");
+        var numbersCount = countRowsInTable(jdbcTemplate, "number");
         assertThat(usersCount).isZero();
         assertThat(numbersCount).isZero();
 
@@ -221,8 +222,8 @@ class UserControllerIntegrationTest {
                         .json(objectMapper.writeValueAsString(ResponseDto.okResponseDto(updatedUserDtoWithId))));
 
         //then
-        usersCount = JdbcTestUtils.countRowsInTable(jdbcTemplate, "[user]");
-        numbersCount = JdbcTestUtils.countRowsInTable(jdbcTemplate, "number");
+        usersCount = countRowsInTable(jdbcTemplate, "[user]");
+        numbersCount = countRowsInTable(jdbcTemplate, "number");
         assertThat(usersCount).isEqualTo(1);
         assertThat(numbersCount).isEqualTo(updatedUserDto.getNumbers().size());
     }
@@ -234,8 +235,8 @@ class UserControllerIntegrationTest {
         var userDto = createUserDto();
         var userId = saveUserDtoInDb(userDto, 1L, ADDRESS).getId();
 
-        var usersCount = JdbcTestUtils.countRowsInTable(jdbcTemplate, "[user]");
-        var numbersCount = JdbcTestUtils.countRowsInTable(jdbcTemplate, "number");
+        var usersCount = countRowsInTable(jdbcTemplate, "[user]");
+        var numbersCount = countRowsInTable(jdbcTemplate, "number");
         assertThat(usersCount).isEqualTo(1);
         assertThat(numbersCount).isEqualTo(1);
 
@@ -250,8 +251,8 @@ class UserControllerIntegrationTest {
                 .andExpect(jsonPath("$.data").value("1"));
 
         //then
-        usersCount = JdbcTestUtils.countRowsInTable(jdbcTemplate, "[user]");
-        numbersCount = JdbcTestUtils.countRowsInTable(jdbcTemplate, "number");
+        usersCount = countRowsInTable(jdbcTemplate, "[user]");
+        numbersCount = countRowsInTable(jdbcTemplate, "number");
         assertThat(usersCount).isZero();
         assertThat(numbersCount).isZero();
     }
