@@ -204,7 +204,7 @@ class UserServiceImplTest {
         when(userRepository.getUserWithNumbersById(ID)).thenReturn(Optional.empty());
 
         //when
-        assertThatThrownBy(() -> userService.updateUser(ID, createUserDto()));
+        assertThatThrownBy(() -> userService.updateUser(ID, createUserDto())).isInstanceOf(NotFoundUserException.class);
 
         //then
         verify(userRepository, times(1)).getUserWithNumbersById(ID);
