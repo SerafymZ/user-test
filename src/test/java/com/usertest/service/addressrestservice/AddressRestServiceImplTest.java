@@ -29,8 +29,8 @@ class AddressRestServiceImplTest {
     private static final String BODY = "body";
     private static final Long ADDRESS_ID = 1L;
 
-    @Value("${address-service.url}")
-    private String addressUrl;
+    @Value("${remote.url}")
+    private String remoteUrl;
 
     @Autowired
     AddressRestServiceImpl addressRestService;
@@ -47,10 +47,11 @@ class AddressRestServiceImplTest {
     @Test
     void findOrInsertAddress_shouldBeThrewIncorrectResponseEntityStatus() {
         //given
+        var url = remoteUrl + "/address";
         var addressDto = new AddressDto(null, ADDRESS);
         var httpEntity = new HttpEntity<>(addressDto);
         var responseEntity = new ResponseEntity<>(ERROR_BODY, HttpStatus.BAD_REQUEST);
-        when(restService.sendPost(addressUrl, httpEntity)).thenReturn(responseEntity);
+        when(restService.sendPost(url, httpEntity)).thenReturn(responseEntity);
         doThrow(IncorrectResponseEntityStatus.class).when(responseValidationService)
                 .throwIfResponseEntityNotValid(responseEntity, AddressOperationType.FIND_OR_INSERT_ADDRESS);
 
@@ -59,7 +60,7 @@ class AddressRestServiceImplTest {
                 .isInstanceOf(IncorrectResponseEntityStatus.class);
 
         //then
-        verify(restService, times(1)).sendPost(addressUrl, httpEntity);
+        verify(restService, times(1)).sendPost(url, httpEntity);
         verify(responseValidationService, times(1))
                 .throwIfResponseEntityNotValid(responseEntity, AddressOperationType.FIND_OR_INSERT_ADDRESS);
     }
@@ -67,10 +68,11 @@ class AddressRestServiceImplTest {
     @Test
     void findOrInsertAddress_shouldBeThrew() {
         //given
+        var url = remoteUrl + "/address";
         var addressDto = new AddressDto(null, ADDRESS);
         var httpEntity = new HttpEntity<>(addressDto);
         var responseEntity = new ResponseEntity<>(BODY, HttpStatus.BAD_REQUEST);
-        when(restService.sendPost(addressUrl, httpEntity)).thenReturn(responseEntity);
+        when(restService.sendPost(url, httpEntity)).thenReturn(responseEntity);
         doNothing().when(responseValidationService)
                 .throwIfResponseEntityNotValid(responseEntity, AddressOperationType.FIND_OR_INSERT_ADDRESS);
         var resultAddressDto = new AddressDto(1L, ADDRESS);
@@ -84,7 +86,7 @@ class AddressRestServiceImplTest {
                 .isInstanceOf(IncorrectStatusDto.class);
 
         //then
-        verify(restService, times(1)).sendPost(addressUrl, httpEntity);
+        verify(restService, times(1)).sendPost(url, httpEntity);
         verify(responseValidationService, times(1))
                 .throwIfResponseEntityNotValid(responseEntity, AddressOperationType.FIND_OR_INSERT_ADDRESS);
         verify(mappingService, times(1)).readAddressDto(responseEntity.getBody());
@@ -95,10 +97,11 @@ class AddressRestServiceImplTest {
     @Test
     void findOrInsertAddress_shouldBeSendPostRequestSuccessful() {
         //given
+        var url = remoteUrl + "/address";
         var addressDto = new AddressDto(null, ADDRESS);
         var httpEntity = new HttpEntity<>(addressDto);
         var responseEntity = new ResponseEntity<>(BODY, HttpStatus.OK);
-        when(restService.sendPost(addressUrl, httpEntity)).thenReturn(responseEntity);
+        when(restService.sendPost(url, httpEntity)).thenReturn(responseEntity);
         doNothing().when(responseValidationService)
                 .throwIfResponseEntityNotValid(responseEntity, AddressOperationType.FIND_OR_INSERT_ADDRESS);
         var resultAddressDto = new AddressDto(1L, ADDRESS);
@@ -112,7 +115,7 @@ class AddressRestServiceImplTest {
 
         //then
         assertThat(actualResult).isEqualTo(resultAddressDto);
-        verify(restService, times(1)).sendPost(addressUrl, httpEntity);
+        verify(restService, times(1)).sendPost(url, httpEntity);
         verify(responseValidationService, times(1))
                 .throwIfResponseEntityNotValid(responseEntity, AddressOperationType.FIND_OR_INSERT_ADDRESS);
         verify(mappingService, times(1)).readAddressDto(responseEntity.getBody());
@@ -123,9 +126,10 @@ class AddressRestServiceImplTest {
     @Test
     void getAddressById_shouldBeThrewIncorrectResponseEntityStatus() {
         //given
+        var url = remoteUrl + "/address/" + ADDRESS_ID;
         var httpEntity = new HttpEntity<>(ADDRESS_ID);
         var responseEntity = new ResponseEntity<>(ERROR_BODY, HttpStatus.OK);
-        when(restService.sendGet(addressUrl + "/" + ADDRESS_ID, httpEntity)).thenReturn(responseEntity);
+        when(restService.sendGet(url, httpEntity)).thenReturn(responseEntity);
         doThrow(IncorrectResponseEntityStatus.class).when(responseValidationService)
                 .throwIfResponseEntityNotValid(responseEntity, AddressOperationType.GET_ADDRESS_BY_ID);
 
@@ -133,7 +137,7 @@ class AddressRestServiceImplTest {
         assertThatThrownBy(() -> addressRestService.getAddressById(ADDRESS_ID))
                 .isInstanceOf(IncorrectResponseEntityStatus.class);
 
-        verify(restService, times(1)).sendGet(addressUrl + "/" + ADDRESS_ID, httpEntity);
+        verify(restService, times(1)).sendGet(url, httpEntity);
         verify(responseValidationService, times(1))
                 .throwIfResponseEntityNotValid(responseEntity, AddressOperationType.GET_ADDRESS_BY_ID);
     }
@@ -141,9 +145,10 @@ class AddressRestServiceImplTest {
     @Test
     void getAddressById_shouldBeThrewIncorrectStatusDto() {
         //given
+        var url = remoteUrl + "/address/" + ADDRESS_ID;
         var httpEntity = new HttpEntity<>(ADDRESS_ID);
         var responseEntity = new ResponseEntity<>(BODY, HttpStatus.OK);
-        when(restService.sendGet(addressUrl + "/" + ADDRESS_ID, httpEntity)).thenReturn(responseEntity);
+        when(restService.sendGet(url, httpEntity)).thenReturn(responseEntity);
         doNothing().when(responseValidationService)
                 .throwIfResponseEntityNotValid(responseEntity, AddressOperationType.GET_ADDRESS_BY_ID);
 
@@ -157,7 +162,7 @@ class AddressRestServiceImplTest {
         assertThatThrownBy(() -> addressRestService.getAddressById(ADDRESS_ID));
 
         //then
-        verify(restService, times(1)).sendGet(addressUrl + "/" + ADDRESS_ID, httpEntity);
+        verify(restService, times(1)).sendGet(url, httpEntity);
         verify(responseValidationService, times(1))
                 .throwIfResponseEntityNotValid(responseEntity, AddressOperationType.GET_ADDRESS_BY_ID);
         verify(mappingService, times(1)).readAddressDto(responseEntity.getBody());
@@ -168,9 +173,10 @@ class AddressRestServiceImplTest {
     @Test
     void getAddressById_shouldBeFindAddressSuccessful() {
         //given
+        var url = remoteUrl + "/address/" + ADDRESS_ID;
         var httpEntity = new HttpEntity<>(ADDRESS_ID);
         var responseEntity = new ResponseEntity<>(BODY, HttpStatus.OK);
-        when(restService.sendGet(addressUrl + "/" + ADDRESS_ID, httpEntity)).thenReturn(responseEntity);
+        when(restService.sendGet(url, httpEntity)).thenReturn(responseEntity);
         doNothing().when(responseValidationService)
                 .throwIfResponseEntityNotValid(responseEntity, AddressOperationType.GET_ADDRESS_BY_ID);
 
@@ -186,7 +192,7 @@ class AddressRestServiceImplTest {
         //then
         assertThat(actualResult).isEqualTo(resultAddressDto);
 
-        verify(restService, times(1)).sendGet(addressUrl + "/" + ADDRESS_ID, httpEntity);
+        verify(restService, times(1)).sendGet(url, httpEntity);
         verify(responseValidationService, times(1))
                 .throwIfResponseEntityNotValid(responseEntity, AddressOperationType.GET_ADDRESS_BY_ID);
         verify(mappingService, times(1)).readAddressDto(responseEntity.getBody());
@@ -197,9 +203,10 @@ class AddressRestServiceImplTest {
     @Test
     void deleteAddressById_shouldByThrewIncorrectResponseEntityStatus() {
         //given
+        var url = remoteUrl + "/address/" + ADDRESS_ID;
         var httpEntity = new HttpEntity<>(ADDRESS_ID);
         var responseEntity = new ResponseEntity<>(BODY, HttpStatus.OK);
-        when(restService.sendDelete(addressUrl + "/" + ADDRESS_ID, httpEntity)).thenReturn(responseEntity);
+        when(restService.sendDelete(url, httpEntity)).thenReturn(responseEntity);
         doThrow(IncorrectResponseEntityStatus.class).when(responseValidationService)
                 .throwIfResponseEntityNotValid(responseEntity, AddressOperationType.DELETE_ADDRESS_BY_ID);
 
@@ -207,7 +214,7 @@ class AddressRestServiceImplTest {
         assertThatThrownBy(() -> addressRestService.deleteAddressById(ADDRESS_ID))
                 .isInstanceOf(IncorrectResponseEntityStatus.class);
 
-        verify(restService, times(1)).sendDelete(addressUrl + "/" + ADDRESS_ID, httpEntity);
+        verify(restService, times(1)).sendDelete(url, httpEntity);
         verify(responseValidationService, times(1))
                 .throwIfResponseEntityNotValid(responseEntity, AddressOperationType.DELETE_ADDRESS_BY_ID);
     }
@@ -215,9 +222,10 @@ class AddressRestServiceImplTest {
     @Test
     void deleteAddressById_shouldByThrewIncorrectStatusDto() {
         //given
+        var url = remoteUrl + "/address/" + ADDRESS_ID;
         var httpEntity = new HttpEntity<>(ADDRESS_ID);
         var responseEntity = new ResponseEntity<>(BODY, HttpStatus.OK);
-        when(restService.sendDelete(addressUrl + "/" + ADDRESS_ID, httpEntity)).thenReturn(responseEntity);
+        when(restService.sendDelete(url, httpEntity)).thenReturn(responseEntity);
         doNothing().when(responseValidationService)
                 .throwIfResponseEntityNotValid(responseEntity, AddressOperationType.DELETE_ADDRESS_BY_ID);
         var result = 1;
@@ -230,7 +238,7 @@ class AddressRestServiceImplTest {
         assertThatThrownBy(() -> addressRestService.deleteAddressById(ADDRESS_ID));
 
         //then
-        verify(restService, times(1)).sendDelete(addressUrl + "/" + ADDRESS_ID, httpEntity);
+        verify(restService, times(1)).sendDelete(url, httpEntity);
         verify(responseValidationService, times(1))
                 .throwIfResponseEntityNotValid(responseEntity, AddressOperationType.DELETE_ADDRESS_BY_ID);
         verify(mappingService, times(1)).readInteger(responseEntity.getBody());
@@ -241,9 +249,10 @@ class AddressRestServiceImplTest {
     @Test
     void deleteAddressById_shouldBeDeleteAddressSuccessful() {
         //given
+        var url = remoteUrl + "/address/" + ADDRESS_ID;
         var httpEntity = new HttpEntity<>(ADDRESS_ID);
         var responseEntity = new ResponseEntity<>(BODY, HttpStatus.OK);
-        when(restService.sendDelete(addressUrl + "/" + ADDRESS_ID, httpEntity)).thenReturn(responseEntity);
+        when(restService.sendDelete(url, httpEntity)).thenReturn(responseEntity);
         doNothing().when(responseValidationService)
                 .throwIfResponseEntityNotValid(responseEntity, AddressOperationType.DELETE_ADDRESS_BY_ID);
         var expectedResult = 1;
@@ -257,7 +266,7 @@ class AddressRestServiceImplTest {
 
         //then
         assertThat(actualResult).isEqualTo(expectedResult);
-        verify(restService, times(1)).sendDelete(addressUrl + "/" + ADDRESS_ID, httpEntity);
+        verify(restService, times(1)).sendDelete(url, httpEntity);
         verify(responseValidationService, times(1))
                 .throwIfResponseEntityNotValid(responseEntity, AddressOperationType.DELETE_ADDRESS_BY_ID);
         verify(mappingService, times(1)).readInteger(responseEntity.getBody());

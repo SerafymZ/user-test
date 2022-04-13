@@ -7,7 +7,7 @@ spring:
 #  flyway:
 #    baselineOnMigrate: true
 
-address-service:
-  url: "http://localhost:8888/address"
+remote:
+  url: "http://localhost:8888"
 
 

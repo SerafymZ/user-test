@@ -2,6 +2,7 @@ package com.usertest.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.usertest.controller.initializer.MsSQLServer;
+import com.usertest.dto.AddressDto;
 import com.usertest.dto.UserDto;
 import com.usertest.dto.basedto.ResponseDto;
 import com.usertest.service.restservice.RestServiceImpl;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -24,8 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.jdbc.JdbcTestUtils.countRowsInTable;
 import static org.springframework.test.jdbc.JdbcTestUtils.deleteFromTables;
@@ -44,6 +44,9 @@ class UserControllerIntegrationTest {
     private static final List<String> NUMBERS = List.of("+121111111");
     private static final int AGE = 25;
     private static final Long ID = 1L;
+
+    @Value("${remote.url}")
+    private String remoteUrl;
 
     @Autowired
     JdbcTemplate jdbcTemplate;
@@ -75,9 +78,11 @@ class UserControllerIntegrationTest {
         assertThat(countRowsInTable(jdbcTemplate, "[user]")).isEqualTo(1);
         assertThat(countRowsInTable(jdbcTemplate, "number")).isEqualTo(1);
 
+        var url = remoteUrl + "/address/1";
+        var httpEntity = new HttpEntity<>(1L);
         var responseEntityResult
                 = ResponseEntity.ok("{\"status\":\"OK\",\"errors\":null,\"data\":{\"id\":1,\"address\":\"Canada\"}}");
-        when(restService.sendGet(anyString(), isA(HttpEntity.class))).thenReturn(responseEntityResult);
+        when(restService.sendGet(url, httpEntity)).thenReturn(responseEntityResult);
 
         //when
         var expectedUserDto = createUserDto();
@@ -102,9 +107,11 @@ class UserControllerIntegrationTest {
         var userDto = createUserDto();
         userDto.setId(ID);
 
+        var url = remoteUrl + "/address/1";
+        var httpEntity = new HttpEntity<>(1L);
         var responseEntityResult
                 = ResponseEntity.ok("{\"status\":\"OK\",\"errors\":null,\"data\":{\"id\":1,\"address\":\"Canada\"}}");
-        when(restService.sendGet(anyString(), isA(HttpEntity.class))).thenReturn(responseEntityResult);
+        when(restService.sendGet(url, httpEntity)).thenReturn(responseEntityResult);
 
         //when
         var partOfName = "son";
@@ -128,9 +135,12 @@ class UserControllerIntegrationTest {
 
         var userDto = createUserDto();
 
+        var url = remoteUrl + "/address";
+        var addressDto = new AddressDto(null, ADDRESS);
+        var httpEntity = new HttpEntity<>(addressDto);
         var responseEntityResult
                 = ResponseEntity.ok("{\"status\":\"OK\",\"errors\":null,\"data\":{\"id\":1,\"address\":\"Canada\"}}");
-        when(restService.sendPost(anyString(), isA(HttpEntity.class))).thenReturn(responseEntityResult);
+        when(restService.sendPost(url, httpEntity)).thenReturn(responseEntityResult);
 
         //when
         mockMvc.perform(
@@ -170,9 +180,12 @@ class UserControllerIntegrationTest {
                 .address("London")
                 .build();
 
+        var url = remoteUrl + "/address";
+        var addressDto = new AddressDto(null, "London");
+        var httpEntity = new HttpEntity<>(addressDto);
         var responseEntityResult
                 = ResponseEntity.ok("{\"status\":\"OK\",\"errors\":null,\"data\":{\"id\":2,\"address\":\"London\"}}");
-        when(restService.sendPost(anyString(), isA(HttpEntity.class))).thenReturn(responseEntityResult);
+        when(restService.sendPost(url, httpEntity)).thenReturn(responseEntityResult);
 
         //when
         mockMvc.perform(
@@ -197,9 +210,11 @@ class UserControllerIntegrationTest {
         assertThat(countRowsInTable(jdbcTemplate, "[user]")).isEqualTo(1);
         assertThat(countRowsInTable(jdbcTemplate, "number")).isEqualTo(1);
 
+        var url = remoteUrl + "/address/1";
+        var httpEntity = new HttpEntity<>(1L);
         var responseEntityResult
                 = ResponseEntity.ok("{\"status\":\"OK\",\"errors\":null,\"data\":1}}");
-        when(restService.sendDelete(anyString(), isA(HttpEntity.class))).thenReturn(responseEntityResult);
+        when(restService.sendDelete(url, httpEntity)).thenReturn(responseEntityResult);
 
         //when
         mockMvc.perform(
