@@ -258,10 +258,7 @@ class UserControllerIntegrationTest {
     }
 
     private UserDto saveUserDtoInDb(UserDto userDto, Long addressId, String address) {
-        var addressDtoResult = AddressDto.builder()
-                .id(addressId)
-                .address(address)
-                .build();
+        var addressDtoResult = new AddressDto(addressId, address);
 
         var userEntity = userRepository.saveUser(userMapper.toUserEntity(userDto, addressId));
         numberRepository.saveNumbersList(userDto.getNumbers(), userEntity.getId());

@@ -33,7 +33,7 @@ class RestServiceImplTest {
     @Test
     void sendPost_shouldBeReturnedFailedResponseDto() {
         //given
-        var addressDto = createAddressDto();
+        var addressDto = new AddressDto(ID, ADDRESS);
         var httpEntity = new HttpEntity<>(addressDto);
         doThrow(RestClientResponseException.class)
                 .when(restTemplate).exchange(URL, HttpMethod.POST, httpEntity, String.class);
@@ -50,7 +50,7 @@ class RestServiceImplTest {
     @Test
     void sendPost_shouldBeSendPostSuccessful() {
         //given
-        var addressDto = createAddressDto();
+        var addressDto = new AddressDto(ID, ADDRESS);
         var httpEntity = new HttpEntity<>(addressDto);
         var expectedResult = new ResponseEntity<>(BODY, HttpStatus.OK);
         when(restTemplate.exchange(URL, HttpMethod.POST, httpEntity, String.class)).thenReturn(expectedResult);
@@ -126,12 +126,5 @@ class RestServiceImplTest {
         assertThat(actualResult).isEqualTo(expectedResult);
 
         verify(restTemplate, times(1)).exchange(URL, HttpMethod.DELETE, httpEntity, String.class);
-    }
-
-    private AddressDto createAddressDto() {
-        return AddressDto.builder()
-                .id(ID)
-                .address(ADDRESS)
-                .build();
     }
 }

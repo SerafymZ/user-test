@@ -43,7 +43,7 @@ class MappingServiceImplTest {
     @Test
     void readAddressDto_shouldBeReadValueSuccessful() throws JsonProcessingException {
         //given
-        var addressDto = createAddressDto();
+        var addressDto = new AddressDto(ID, ADDRESS);
         var expectedResult = ResponseDto.okResponseDto(addressDto);
         when(objectMapper.readValue(anyString(), isA(TypeReference.class))).thenReturn(expectedResult);
 
@@ -82,12 +82,5 @@ class MappingServiceImplTest {
         assertThat(actualResult).isEqualTo(expectedResult);
 
         verify(objectMapper, times(1)).readValue(anyString(), isA(TypeReference.class));
-    }
-
-    private AddressDto createAddressDto() {
-        return AddressDto.builder()
-                .id(ID)
-                .address(ADDRESS)
-                .build();
     }
 }

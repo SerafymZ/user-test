@@ -65,7 +65,7 @@ class UserServiceImplTest {
         var userWithNumberEntity = createUserWithNumberEntity();
         when(userRepository.getUserWithNumbersById(ID)).thenReturn(Optional.of(userWithNumberEntity));
 
-        var addressDto = createAddressDto();
+        var addressDto = new AddressDto(ID, ADDRESS);
         when(addressRestService.getAddressById(ADDRESS_ID)).thenReturn(addressDto);
 
         var expectedResult = createUserDto();
@@ -90,7 +90,7 @@ class UserServiceImplTest {
         var userWithNumberEntity = createUserWithNumberEntity();
         when(userRepository.getUsersByFilters(partOfName, partOfNumber)).thenReturn(List.of(userWithNumberEntity));
 
-        var addressDto = createAddressDto();
+        var addressDto = new AddressDto(ID, ADDRESS);
         when(addressRestService.getAddressById(ADDRESS_ID)).thenReturn(addressDto);
 
         var userDto = createUserDto();
@@ -145,7 +145,7 @@ class UserServiceImplTest {
         when(userRepository.getUsersByFilters(partOfName, partOfNumber))
                 .thenReturn(List.of(userWithNumberEntityFirst, userWithNumberEntitySecond));
 
-        var addressDto = createAddressDto();
+        var addressDto = new AddressDto(ID, ADDRESS);
         when(addressRestService.getAddressById(ADDRESS_ID)).thenReturn(addressDto);
 
         var userDtoFirst = createUserDto();
@@ -183,10 +183,8 @@ class UserServiceImplTest {
     @Test
     void saveUser_shouldBeReturnedUserDtoSuccessfully() {
         //given
-        var addressDtoWithoutId = AddressDto.builder()
-                .address(ADDRESS)
-                .build();
-        var addressDto = createAddressDto();
+        var addressDtoWithoutId = new AddressDto(null, ADDRESS);
+        var addressDto = new AddressDto(ADDRESS_ID, ADDRESS);
         when(addressRestService.findOrInsertAddress(addressDtoWithoutId)).thenReturn(addressDto);
         var userDto = createUserDto();
         var userEntity = createUserEntity();
@@ -231,10 +229,8 @@ class UserServiceImplTest {
         //given
         var userWithNumberEntity = createUserWithNumberEntity();
         when(userRepository.getUserWithNumbersById(ID)).thenReturn(Optional.of(userWithNumberEntity));
-        var addressDto = createAddressDto();
-        var addressDtoWithoutId = AddressDto.builder()
-                .address(ADDRESS)
-                .build();
+        var addressDto = new AddressDto(ADDRESS_ID, ADDRESS);
+        var addressDtoWithoutId = new AddressDto(null, ADDRESS);
         when(addressRestService.findOrInsertAddress(addressDtoWithoutId)).thenReturn(addressDto);
         var userDto = createUserDto();
         var userEntity = createUserEntity();
@@ -333,13 +329,6 @@ class UserServiceImplTest {
                 .age(AGE)
                 .number(NUMBERS_LINE)
                 .addressId(ADDRESS_ID)
-                .build();
-    }
-
-    private AddressDto createAddressDto() {
-        return AddressDto.builder()
-                .id(ADDRESS_ID)
-                .address(ADDRESS)
                 .build();
     }
 

@@ -47,7 +47,7 @@ class AddressRestServiceImplTest {
     @Test
     void findOrInsertAddress_shouldBeThrewIncorrectResponseEntityStatus() {
         //given
-        var addressDto = createAddressDto();
+        var addressDto = new AddressDto(null, ADDRESS);
         var httpEntity = new HttpEntity<>(addressDto);
         var responseEntity = new ResponseEntity<>(ERROR_BODY, HttpStatus.BAD_REQUEST);
         when(restService.sendPost(addressUrl, httpEntity)).thenReturn(responseEntity);
@@ -67,14 +67,13 @@ class AddressRestServiceImplTest {
     @Test
     void findOrInsertAddress_shouldBeThrew() {
         //given
-        var addressDto = createAddressDto();
+        var addressDto = new AddressDto(null, ADDRESS);
         var httpEntity = new HttpEntity<>(addressDto);
         var responseEntity = new ResponseEntity<>(BODY, HttpStatus.BAD_REQUEST);
         when(restService.sendPost(addressUrl, httpEntity)).thenReturn(responseEntity);
         doNothing().when(responseValidationService)
                 .throwIfResponseEntityNotValid(responseEntity, AddressOperationType.FIND_OR_INSERT_ADDRESS);
-        var resultAddressDto = createAddressDto();
-        resultAddressDto.setId(1L);
+        var resultAddressDto = new AddressDto(1L, ADDRESS);
         var responseDto = ResponseDto.okResponseDto(resultAddressDto);
         when(mappingService.readAddressDto(responseEntity.getBody())).thenReturn(responseDto);
         doThrow(IncorrectStatusDto.class).when(responseValidationService)
@@ -96,14 +95,13 @@ class AddressRestServiceImplTest {
     @Test
     void findOrInsertAddress_shouldBeSendPostRequestSuccessful() {
         //given
-        var addressDto = createAddressDto();
+        var addressDto = new AddressDto(null, ADDRESS);
         var httpEntity = new HttpEntity<>(addressDto);
         var responseEntity = new ResponseEntity<>(BODY, HttpStatus.OK);
         when(restService.sendPost(addressUrl, httpEntity)).thenReturn(responseEntity);
         doNothing().when(responseValidationService)
                 .throwIfResponseEntityNotValid(responseEntity, AddressOperationType.FIND_OR_INSERT_ADDRESS);
-        var resultAddressDto = createAddressDto();
-        resultAddressDto.setId(1L);
+        var resultAddressDto = new AddressDto(1L, ADDRESS);
         var responseDto = ResponseDto.okResponseDto(resultAddressDto);
         when(mappingService.readAddressDto(responseEntity.getBody())).thenReturn(responseDto);
         doNothing().when(responseValidationService)
@@ -149,8 +147,7 @@ class AddressRestServiceImplTest {
         doNothing().when(responseValidationService)
                 .throwIfResponseEntityNotValid(responseEntity, AddressOperationType.GET_ADDRESS_BY_ID);
 
-        var resultAddressDto = createAddressDto();
-        resultAddressDto.setId(ADDRESS_ID);
+        var resultAddressDto = new AddressDto(ADDRESS_ID, ADDRESS);
         var responseAddressDto = ResponseDto.okResponseDto(resultAddressDto);
         when(mappingService.readAddressDto(responseEntity.getBody())).thenReturn(responseAddressDto);
         doThrow(IncorrectStatusDto.class).when(responseValidationService)
@@ -177,8 +174,7 @@ class AddressRestServiceImplTest {
         doNothing().when(responseValidationService)
                 .throwIfResponseEntityNotValid(responseEntity, AddressOperationType.GET_ADDRESS_BY_ID);
 
-        var resultAddressDto = createAddressDto();
-        resultAddressDto.setId(ADDRESS_ID);
+        var resultAddressDto = new AddressDto(ADDRESS_ID, ADDRESS);
         var responseAddressDto = ResponseDto.okResponseDto(resultAddressDto);
         when(mappingService.readAddressDto(responseEntity.getBody())).thenReturn(responseAddressDto);
         doNothing().when(responseValidationService)
@@ -267,11 +263,5 @@ class AddressRestServiceImplTest {
         verify(mappingService, times(1)).readInteger(responseEntity.getBody());
         verify(responseValidationService, times(1))
                 .throwIfStatusResponseDtoNotValid(responseDto, AddressOperationType.DELETE_ADDRESS_BY_ID);
-    }
-
-    private AddressDto createAddressDto() {
-        return AddressDto.builder()
-                .address(ADDRESS)
-                .build();
     }
 }
