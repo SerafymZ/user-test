@@ -1,6 +1,5 @@
 package com.usertest.service.restservice;
 
-import com.usertest.dto.AddressDto;
 import com.usertest.dto.basedto.ResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
@@ -18,39 +17,25 @@ public class RestServiceImpl implements RestService {
     private final RestTemplate restTemplate;
 
     @Override
-    public ResponseEntity<String> sendPost(String url, HttpEntity<AddressDto> httpEntity) {
-        try {
-            return restTemplate.exchange(
-                    url,
-                    HttpMethod.POST,
-                    httpEntity,
-                    String.class
-            );
-        } catch (RestClientResponseException exception) {
-            return new ResponseEntity(ResponseDto.failedResponseDto(exception.getMessage()), HttpStatus.BAD_REQUEST);
-        }
+    public <T> ResponseEntity<String> sendPost(String url, HttpEntity<T> httpEntity) {
+        return sendRequest(url, HttpMethod.POST, httpEntity);
     }
 
     @Override
-    public ResponseEntity<String> sendGet(String url, HttpEntity<Long> httpEntity) {
-        try {
-            return restTemplate.exchange(
-                    url,
-                    HttpMethod.GET,
-                    httpEntity,
-                    String.class
-            );
-        } catch (RestClientResponseException exception) {
-            return new ResponseEntity(ResponseDto.failedResponseDto(exception.getMessage()), HttpStatus.BAD_REQUEST);
-        }
+    public <T> ResponseEntity<String> sendGet(String url, HttpEntity<T> httpEntity) {
+        return sendRequest(url, HttpMethod.GET, httpEntity);
     }
 
     @Override
-    public ResponseEntity<String> sendDelete(String url, HttpEntity<Long> httpEntity) {
+    public <T> ResponseEntity<String> sendDelete(String url, HttpEntity<T> httpEntity) {
+        return sendRequest(url, HttpMethod.DELETE, httpEntity);
+    }
+
+    private <T> ResponseEntity<String> sendRequest(String url, HttpMethod httpMethod, HttpEntity<T> httpEntity) {
         try {
             return restTemplate.exchange(
                     url,
-                    HttpMethod.DELETE,
+                    httpMethod,
                     httpEntity,
                     String.class
             );
