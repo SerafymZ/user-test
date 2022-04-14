@@ -14,13 +14,13 @@ public class UserDto {
     private Long id;
 
     @NotBlank
-    @Size(max = 50, message = "Name size must be less than 50 symbols.")
+    @Size(max = 50, message = "{user.field.name.exceeded-size}")
     private String name;
-    @Max(value = 130, message = "Age must be less then 130.")
+    @Max(value = 130, message = "{user.field.age.exceeded-value}")
     private Integer age;
 
     private List<String> numbers;
 
-    @Size(max = 50, message = "Address size must be less than 50 symbols.")
+    @Size(max = 50, message = "{user.field.address.exceeded-size}")
     private String address;
 }

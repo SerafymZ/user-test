@@ -80,8 +80,9 @@ class UserControllerIntegrationTest {
 
         var url = remoteUrl + "/address/1";
         var httpEntity = new HttpEntity<>(1L);
+        var addressDto = new AddressDto(1L, ADDRESS);
         var responseEntityResult
-                = ResponseEntity.ok("{\"status\":\"OK\",\"errors\":null,\"data\":{\"id\":1,\"address\":\"Canada\"}}");
+                = ResponseEntity.ok(objectMapper.writeValueAsString(ResponseDto.okResponseDto(addressDto)));
         when(restService.sendGet(url, httpEntity)).thenReturn(responseEntityResult);
 
         //when
@@ -110,8 +111,9 @@ class UserControllerIntegrationTest {
 
         var url = remoteUrl + "/address/1";
         var httpEntity = new HttpEntity<>(1L);
+        var addressDto = new AddressDto(1L, ADDRESS);
         var responseEntityResult
-                = ResponseEntity.ok("{\"status\":\"OK\",\"errors\":null,\"data\":{\"id\":1,\"address\":\"Canada\"}}");
+                = ResponseEntity.ok(objectMapper.writeValueAsString(ResponseDto.okResponseDto(addressDto)));
         when(restService.sendGet(url, httpEntity)).thenReturn(responseEntityResult);
 
         //when
@@ -129,7 +131,6 @@ class UserControllerIntegrationTest {
     }
 
     @Test
-    @Transactional
     void saveUser() throws Exception {
         //given
         assertThat(countRowsInTable(jdbcTemplate, "[user]")).isZero();
@@ -140,8 +141,9 @@ class UserControllerIntegrationTest {
         var url = remoteUrl + "/address";
         var addressDto = new AddressDto(null, ADDRESS);
         var httpEntity = new HttpEntity<>(addressDto);
+        var addressDtoResult = new AddressDto(1L, ADDRESS);
         var responseEntityResult
-                = ResponseEntity.ok("{\"status\":\"OK\",\"errors\":null,\"data\":{\"id\":1,\"address\":\"Canada\"}}");
+                = ResponseEntity.ok(objectMapper.writeValueAsString(ResponseDto.okResponseDto(addressDtoResult)));
         when(restService.sendPost(url, httpEntity)).thenReturn(responseEntityResult);
 
         //when
@@ -161,9 +163,40 @@ class UserControllerIntegrationTest {
         verify(restService, times(1)).sendPost(url, httpEntity);
     }
 
-    @Sql("/sql/test_data/save_one_user_on_db.sql")
     @Test
     @Transactional
+    void saveUser_transactionalNotWork() throws Exception {
+        //given
+        assertThat(countRowsInTable(jdbcTemplate, "[user]")).isZero();
+        assertThat(countRowsInTable(jdbcTemplate, "number")).isZero();
+
+        var userDto = createUserDto();
+        userDto.setNumbers(List.of("00000111112222233333444445555566666777778888899999123"));
+
+        var url = remoteUrl + "/address";
+        var addressDto = new AddressDto(null, ADDRESS);
+        var httpEntity = new HttpEntity<>(addressDto);
+        var addressDtoResult = new AddressDto(1L, ADDRESS);
+        var responseEntityResult
+                = ResponseEntity.ok(objectMapper.writeValueAsString(ResponseDto.okResponseDto(addressDtoResult)));
+        when(restService.sendPost(url, httpEntity)).thenReturn(responseEntityResult);
+
+        //when
+        mockMvc.perform(
+                        post(PATH)
+                                .content(objectMapper.writeValueAsString(userDto))
+                                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+
+        //then
+        assertThat(countRowsInTable(jdbcTemplate, "[user]")).isEqualTo(1);
+        assertThat(countRowsInTable(jdbcTemplate, "number")).isEqualTo(0);
+
+        verify(restService, times(1)).sendPost(url, httpEntity);
+    }
+
+    @Sql("/sql/test_data/save_one_user_on_db.sql")
+    @Test
     void updateUser() throws Exception {
         //given
         assertThat(countRowsInTable(jdbcTemplate, "[user]")).isEqualTo(1);
@@ -187,8 +220,9 @@ class UserControllerIntegrationTest {
         var url = remoteUrl + "/address";
         var addressDto = new AddressDto(null, "London");
         var httpEntity = new HttpEntity<>(addressDto);
+        var addressDtoResult = new AddressDto(2L, "London");
         var responseEntityResult
-                = ResponseEntity.ok("{\"status\":\"OK\",\"errors\":null,\"data\":{\"id\":2,\"address\":\"London\"}}");
+                = ResponseEntity.ok(objectMapper.writeValueAsString(ResponseDto.okResponseDto(addressDtoResult)));
         when(restService.sendPost(url, httpEntity)).thenReturn(responseEntityResult);
 
         //when
@@ -209,17 +243,15 @@ class UserControllerIntegrationTest {
 
     @Sql("/sql/test_data/save_one_user_on_db.sql")
     @Test
-    @Transactional
     void deleteUserById() throws Exception {
         //given
-
         assertThat(countRowsInTable(jdbcTemplate, "[user]")).isEqualTo(1);
         assertThat(countRowsInTable(jdbcTemplate, "number")).isEqualTo(1);
 
         var url = remoteUrl + "/address/1";
         var httpEntity = new HttpEntity<>(1L);
         var responseEntityResult
-                = ResponseEntity.ok("{\"status\":\"OK\",\"errors\":null,\"data\":1}}");
+                = ResponseEntity.ok(objectMapper.writeValueAsString(ResponseDto.okResponseDto(1L)));
         when(restService.sendDelete(url, httpEntity)).thenReturn(responseEntityResult);
 
         //when
