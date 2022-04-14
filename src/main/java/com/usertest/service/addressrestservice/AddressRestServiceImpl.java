@@ -34,7 +34,7 @@ public class AddressRestServiceImpl implements AddressRestService{
                 AddressOperationType.FIND_OR_INSERT_ADDRESS
         );
         String body = responseEntity.getBody();
-        ResponseDto<AddressDto> responseAddressDto = mappingService.readAddressDto(body);
+        ResponseDto<AddressDto> responseAddressDto = mappingService.readBody(body, AddressDto.class);
         responseValidationService.throwIfStatusResponseDtoNotValid(
                 responseAddressDto,
                 AddressOperationType.FIND_OR_INSERT_ADDRESS
@@ -49,7 +49,7 @@ public class AddressRestServiceImpl implements AddressRestService{
                 restService.sendGet(url, new HttpEntity<>(addressId));
         responseValidationService.throwIfResponseEntityNotValid(responseEntity, AddressOperationType.GET_ADDRESS_BY_ID);
         String body = responseEntity.getBody();
-        ResponseDto<AddressDto> responseAddressDto = mappingService.readAddressDto(body);
+        ResponseDto<AddressDto> responseAddressDto = mappingService.readBody(body, AddressDto.class);
         responseValidationService.throwIfStatusResponseDtoNotValid(
                 responseAddressDto,
                 AddressOperationType.GET_ADDRESS_BY_ID
@@ -64,7 +64,7 @@ public class AddressRestServiceImpl implements AddressRestService{
                 restService.sendDelete(url, new HttpEntity<>(addressId));
         responseValidationService.throwIfResponseEntityNotValid(responseEntity, AddressOperationType.DELETE_ADDRESS_BY_ID);
         String body = responseEntity.getBody();
-        ResponseDto<Integer> responseDto = mappingService.readInteger(body);
+        ResponseDto<Integer> responseDto = mappingService.readBody(body, Integer.class);
         responseValidationService.throwIfStatusResponseDtoNotValid(responseDto, AddressOperationType.DELETE_ADDRESS_BY_ID);
         return responseDto.getData();
     }
