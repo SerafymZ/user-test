@@ -1,5 +1,6 @@
 package com.usertest.service.addressrestservice;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.usertest.dto.AddressDto;
 import com.usertest.dto.basedto.ResponseDto;
 import com.usertest.service.mappingservice.MappingService;
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
 @Service
-public class AddressRestServiceImpl implements AddressRestService{
+public class AddressRestServiceImpl implements AddressRestService {
 
     @Value("${remote.url}")
     private String remoteUrl;
@@ -34,7 +35,7 @@ public class AddressRestServiceImpl implements AddressRestService{
                 AddressOperationType.FIND_OR_INSERT_ADDRESS
         );
         String body = responseEntity.getBody();
-        ResponseDto<AddressDto> responseAddressDto = mappingService.readBody(body, AddressDto.class);
+        ResponseDto<AddressDto> responseAddressDto = mappingService.readBody(body, new TypeReference<>() {});
         responseValidationService.throwIfStatusResponseDtoNotValid(
                 responseAddressDto,
                 AddressOperationType.FIND_OR_INSERT_ADDRESS
@@ -49,7 +50,7 @@ public class AddressRestServiceImpl implements AddressRestService{
                 restService.sendGet(url, new HttpEntity<>(addressId));
         responseValidationService.throwIfResponseEntityNotValid(responseEntity, AddressOperationType.GET_ADDRESS_BY_ID);
         String body = responseEntity.getBody();
-        ResponseDto<AddressDto> responseAddressDto = mappingService.readBody(body, AddressDto.class);
+        ResponseDto<AddressDto> responseAddressDto = mappingService.readBody(body, new TypeReference<>() {});
         responseValidationService.throwIfStatusResponseDtoNotValid(
                 responseAddressDto,
                 AddressOperationType.GET_ADDRESS_BY_ID
@@ -64,7 +65,7 @@ public class AddressRestServiceImpl implements AddressRestService{
                 restService.sendDelete(url, new HttpEntity<>(addressId));
         responseValidationService.throwIfResponseEntityNotValid(responseEntity, AddressOperationType.DELETE_ADDRESS_BY_ID);
         String body = responseEntity.getBody();
-        ResponseDto<Integer> responseDto = mappingService.readBody(body, Integer.class);
+        ResponseDto<Integer> responseDto = mappingService.readBody(body, new TypeReference<>() {});
         responseValidationService.throwIfStatusResponseDtoNotValid(responseDto, AddressOperationType.DELETE_ADDRESS_BY_ID);
         return responseDto.getData();
     }

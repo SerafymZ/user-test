@@ -1,5 +1,6 @@
 package com.usertest.service.addressrestservice;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.usertest.dto.AddressDto;
 import com.usertest.dto.basedto.ResponseDto;
 import com.usertest.exception.IncorrectResponseEntityStatus;
@@ -77,7 +78,7 @@ class AddressRestServiceImplTest {
                 .throwIfResponseEntityNotValid(responseEntity, AddressOperationType.FIND_OR_INSERT_ADDRESS);
         var resultAddressDto = new AddressDto(1L, ADDRESS);
         var responseDto = ResponseDto.okResponseDto(resultAddressDto);
-        when(mappingService.readAddressDto(responseEntity.getBody())).thenReturn(responseDto);
+        when(mappingService.readBody(anyString(), isA(TypeReference.class))).thenReturn(responseDto);
         doThrow(IncorrectStatusDto.class).when(responseValidationService)
                 .throwIfStatusResponseDtoNotValid(responseDto, AddressOperationType.FIND_OR_INSERT_ADDRESS);
 
@@ -89,7 +90,7 @@ class AddressRestServiceImplTest {
         verify(restService, times(1)).sendPost(url, httpEntity);
         verify(responseValidationService, times(1))
                 .throwIfResponseEntityNotValid(responseEntity, AddressOperationType.FIND_OR_INSERT_ADDRESS);
-        verify(mappingService, times(1)).readAddressDto(responseEntity.getBody());
+        verify(mappingService, times(1)).readBody(anyString(), isA(TypeReference.class));
         verify(responseValidationService, times(1))
                 .throwIfStatusResponseDtoNotValid(responseDto, AddressOperationType.FIND_OR_INSERT_ADDRESS);
     }
@@ -106,7 +107,7 @@ class AddressRestServiceImplTest {
                 .throwIfResponseEntityNotValid(responseEntity, AddressOperationType.FIND_OR_INSERT_ADDRESS);
         var resultAddressDto = new AddressDto(1L, ADDRESS);
         var responseDto = ResponseDto.okResponseDto(resultAddressDto);
-        when(mappingService.readAddressDto(responseEntity.getBody())).thenReturn(responseDto);
+        when(mappingService.readBody(anyString(), isA(TypeReference.class))).thenReturn(responseDto);
         doNothing().when(responseValidationService)
                 .throwIfStatusResponseDtoNotValid(responseDto, AddressOperationType.FIND_OR_INSERT_ADDRESS);
 
@@ -118,7 +119,7 @@ class AddressRestServiceImplTest {
         verify(restService, times(1)).sendPost(url, httpEntity);
         verify(responseValidationService, times(1))
                 .throwIfResponseEntityNotValid(responseEntity, AddressOperationType.FIND_OR_INSERT_ADDRESS);
-        verify(mappingService, times(1)).readAddressDto(responseEntity.getBody());
+        verify(mappingService, times(1)).readBody(anyString(), isA(TypeReference.class));
         verify(responseValidationService, times(1))
                 .throwIfStatusResponseDtoNotValid(responseDto, AddressOperationType.FIND_OR_INSERT_ADDRESS);
     }
@@ -154,7 +155,7 @@ class AddressRestServiceImplTest {
 
         var resultAddressDto = new AddressDto(ADDRESS_ID, ADDRESS);
         var responseAddressDto = ResponseDto.okResponseDto(resultAddressDto);
-        when(mappingService.readAddressDto(responseEntity.getBody())).thenReturn(responseAddressDto);
+        when(mappingService.readBody(anyString(), isA(TypeReference.class))).thenReturn(responseAddressDto);
         doThrow(IncorrectStatusDto.class).when(responseValidationService)
                 .throwIfStatusResponseDtoNotValid(responseAddressDto, AddressOperationType.GET_ADDRESS_BY_ID);
 
@@ -165,7 +166,7 @@ class AddressRestServiceImplTest {
         verify(restService, times(1)).sendGet(url, httpEntity);
         verify(responseValidationService, times(1))
                 .throwIfResponseEntityNotValid(responseEntity, AddressOperationType.GET_ADDRESS_BY_ID);
-        verify(mappingService, times(1)).readAddressDto(responseEntity.getBody());
+        verify(mappingService, times(1)).readBody(anyString(), isA(TypeReference.class));
         verify(responseValidationService, times(1))
                 .throwIfStatusResponseDtoNotValid(responseAddressDto, AddressOperationType.GET_ADDRESS_BY_ID);
     }
@@ -182,7 +183,7 @@ class AddressRestServiceImplTest {
 
         var resultAddressDto = new AddressDto(ADDRESS_ID, ADDRESS);
         var responseAddressDto = ResponseDto.okResponseDto(resultAddressDto);
-        when(mappingService.readAddressDto(responseEntity.getBody())).thenReturn(responseAddressDto);
+        when(mappingService.readBody(anyString(), isA(TypeReference.class))).thenReturn(responseAddressDto);
         doNothing().when(responseValidationService)
                 .throwIfStatusResponseDtoNotValid(responseAddressDto, AddressOperationType.GET_ADDRESS_BY_ID);
 
@@ -195,7 +196,7 @@ class AddressRestServiceImplTest {
         verify(restService, times(1)).sendGet(url, httpEntity);
         verify(responseValidationService, times(1))
                 .throwIfResponseEntityNotValid(responseEntity, AddressOperationType.GET_ADDRESS_BY_ID);
-        verify(mappingService, times(1)).readAddressDto(responseEntity.getBody());
+        verify(mappingService, times(1)).readBody(anyString(), isA(TypeReference.class));
         verify(responseValidationService, times(1))
                 .throwIfStatusResponseDtoNotValid(responseAddressDto, AddressOperationType.GET_ADDRESS_BY_ID);
     }
@@ -230,7 +231,7 @@ class AddressRestServiceImplTest {
                 .throwIfResponseEntityNotValid(responseEntity, AddressOperationType.DELETE_ADDRESS_BY_ID);
         var result = 1;
         var responseDto = ResponseDto.okResponseDto(result);
-        when(mappingService.readInteger(responseEntity.getBody())).thenReturn(responseDto);
+        when(mappingService.readBody(anyString(), isA(TypeReference.class))).thenReturn(responseDto);
         doThrow(IncorrectStatusDto.class).when(responseValidationService)
                 .throwIfStatusResponseDtoNotValid(responseDto, AddressOperationType.DELETE_ADDRESS_BY_ID);
 
@@ -241,7 +242,7 @@ class AddressRestServiceImplTest {
         verify(restService, times(1)).sendDelete(url, httpEntity);
         verify(responseValidationService, times(1))
                 .throwIfResponseEntityNotValid(responseEntity, AddressOperationType.DELETE_ADDRESS_BY_ID);
-        verify(mappingService, times(1)).readInteger(responseEntity.getBody());
+        verify(mappingService, times(1)).readBody(anyString(), isA(TypeReference.class));
         verify(responseValidationService, times(1))
                 .throwIfStatusResponseDtoNotValid(responseDto, AddressOperationType.DELETE_ADDRESS_BY_ID);
     }
@@ -257,7 +258,7 @@ class AddressRestServiceImplTest {
                 .throwIfResponseEntityNotValid(responseEntity, AddressOperationType.DELETE_ADDRESS_BY_ID);
         var expectedResult = 1;
         var responseDto = ResponseDto.okResponseDto(expectedResult);
-        when(mappingService.readInteger(responseEntity.getBody())).thenReturn(responseDto);
+        when(mappingService.readBody(anyString(), isA(TypeReference.class))).thenReturn(responseDto);
         doNothing().when(responseValidationService)
                 .throwIfStatusResponseDtoNotValid(responseDto, AddressOperationType.DELETE_ADDRESS_BY_ID);
 
@@ -269,7 +270,7 @@ class AddressRestServiceImplTest {
         verify(restService, times(1)).sendDelete(url, httpEntity);
         verify(responseValidationService, times(1))
                 .throwIfResponseEntityNotValid(responseEntity, AddressOperationType.DELETE_ADDRESS_BY_ID);
-        verify(mappingService, times(1)).readInteger(responseEntity.getBody());
+        verify(mappingService, times(1)).readBody(anyString(), isA(TypeReference.class));
         verify(responseValidationService, times(1))
                 .throwIfStatusResponseDtoNotValid(responseDto, AddressOperationType.DELETE_ADDRESS_BY_ID);
     }

@@ -3,6 +3,7 @@ package com.usertest.service.mappingservice;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.usertest.dto.AddressDto;
 import com.usertest.dto.basedto.ResponseDto;
 import com.usertest.exception.MappingException;
@@ -29,58 +30,38 @@ class MappingServiceImplTest {
     ObjectMapper objectMapper;
 
     @Test
-    void readAddressDto_shouldBeThrewJsonProcessingException() throws JsonProcessingException {
+    void readBody_shouldBeThrewJsonProcessingException() throws JsonProcessingException {
         //given
-        doThrow(JsonProcessingException.class).when(objectMapper).readValue(anyString(), isA(TypeReference.class));
+        var objectReaderMock = mock(ObjectReader.class);
+        var typeReference = new TypeReference<>() {};
+        when(objectMapper.readerFor(typeReference)).thenReturn(objectReaderMock);
+        doThrow(JsonProcessingException.class).when(objectReaderMock).readValue(anyString());
 
         //when
-        assertThatThrownBy(() -> mappingService.readAddressDto(BODY)).isInstanceOf(MappingException.class);
+        assertThatThrownBy(() -> mappingService.readBody(BODY, typeReference)).isInstanceOf(MappingException.class);
 
         //then
-        verify(objectMapper, times(1)).readValue(anyString(), isA(TypeReference.class));
+        verify(objectMapper, times(1)).readerFor(typeReference);
+        verify(objectReaderMock, times(1)).readValue(anyString());
     }
 
     @Test
-    void readAddressDto_shouldBeReadValueSuccessful() throws JsonProcessingException {
+    void readBody_shouldBeReadValueSuccessful() throws JsonProcessingException {
         //given
+        var objectReaderMock = mock(ObjectReader.class);
+        var typeReference = new TypeReference<>() {};
+        when(objectMapper.readerFor(typeReference)).thenReturn(objectReaderMock);
         var addressDto = new AddressDto(ID, ADDRESS);
         var expectedResult = ResponseDto.okResponseDto(addressDto);
-        when(objectMapper.readValue(anyString(), isA(TypeReference.class))).thenReturn(expectedResult);
+        when(objectReaderMock.readValue(anyString())).thenReturn(expectedResult);
 
         //when
-        var actualResult = mappingService.readAddressDto(BODY);
+        var actualResult = mappingService.readBody(BODY, typeReference);
 
         //then
         assertThat(actualResult).isEqualTo(expectedResult);
 
-        verify(objectMapper, times(1)).readValue(anyString(), isA(TypeReference.class));
-    }
-
-    @Test
-    void readInteger() throws JsonProcessingException {
-        //given
-        doThrow(JsonProcessingException.class).when(objectMapper).readValue(anyString(), isA(TypeReference.class));
-
-        //when
-        assertThatThrownBy(() -> mappingService.readInteger(BODY)).isInstanceOf(MappingException.class);
-
-        //then
-        verify(objectMapper, times(1)).readValue(anyString(), isA(TypeReference.class));
-    }
-
-    @Test
-    void readInteger_() throws JsonProcessingException {
-        //given
-        var result = 1;
-        var expectedResult = ResponseDto.okResponseDto(result);
-        when(objectMapper.readValue(anyString(), isA(TypeReference.class))).thenReturn(expectedResult);
-
-        //when
-        var actualResult = mappingService.readInteger(BODY);
-
-        //then
-        assertThat(actualResult).isEqualTo(expectedResult);
-
-        verify(objectMapper, times(1)).readValue(anyString(), isA(TypeReference.class));
+        verify(objectMapper, times(1)).readerFor(typeReference);
+        verify(objectReaderMock, times(1)).readValue(anyString());
     }
 }

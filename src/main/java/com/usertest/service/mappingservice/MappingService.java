@@ -1,7 +1,7 @@
 package com.usertest.service.mappingservice;
 
-import com.usertest.dto.basedto.ResponseDto;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 public interface MappingService {
-    <T> ResponseDto<T> readBody(String body, Class<T> contentClass);
+    <T> T readBody(String body, TypeReference<T> typeReference);
 }
