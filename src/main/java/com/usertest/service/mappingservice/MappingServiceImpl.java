@@ -18,7 +18,7 @@ public class MappingServiceImpl implements MappingService{
         try {
             return objectMapper.readerFor(typeReference).readValue(body);
         } catch (JsonProcessingException e) {
-            throw new MappingException("Failed to read address. body: " + body);
+            throw new MappingException("Failed to read string body. body: " + body);
         }
     }
 }

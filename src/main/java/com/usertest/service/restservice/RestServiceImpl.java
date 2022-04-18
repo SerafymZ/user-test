@@ -2,10 +2,7 @@ package com.usertest.service.restservice;
 
 import com.usertest.dto.basedto.ResponseDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
@@ -17,18 +14,22 @@ public class RestServiceImpl implements RestService {
     private final RestTemplate restTemplate;
 
     @Override
-    public <T> ResponseEntity<String> sendPost(String url, HttpEntity<T> httpEntity) {
-        return sendRequest(url, HttpMethod.POST, httpEntity);
+    public <T> ResponseEntity<String> sendPost(String url, T body) {
+        return sendRequest(url, HttpMethod.POST, new HttpEntity<>(body));
     }
 
     @Override
-    public <T> ResponseEntity<String> sendGet(String url, HttpEntity<T> httpEntity) {
-        return sendRequest(url, HttpMethod.GET, httpEntity);
+    public <T> ResponseEntity<String> sendGet(String url) {
+        var headers = new HttpHeaders();
+        headers.set("methodName", "Get");
+        return sendRequest(url, HttpMethod.GET, new HttpEntity<>(headers));
     }
 
     @Override
-    public <T> ResponseEntity<String> sendDelete(String url, HttpEntity<T> httpEntity) {
-        return sendRequest(url, HttpMethod.DELETE, httpEntity);
+    public <T> ResponseEntity<String> sendDelete(String url) {
+        var headers = new HttpHeaders();
+        headers.set("methodName", "Delete");
+        return sendRequest(url, HttpMethod.DELETE, new HttpEntity<>(headers));
     }
 
     private <T> ResponseEntity<String> sendRequest(String url, HttpMethod httpMethod, HttpEntity<T> httpEntity) {

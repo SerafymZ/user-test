@@ -6,10 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
@@ -40,7 +37,7 @@ class RestServiceImplTest {
         var expectedResult = new ResponseEntity(ResponseDto.failedResponseDto(null), HttpStatus.BAD_REQUEST);
 
         //when
-        var actualResult = restService.sendPost(URL, httpEntity);
+        var actualResult = restService.sendPost(URL, addressDto);
 
         //then
         assertThat(actualResult).isEqualTo(expectedResult);
@@ -56,7 +53,7 @@ class RestServiceImplTest {
         when(restTemplate.exchange(URL, HttpMethod.POST, httpEntity, String.class)).thenReturn(expectedResult);
 
         //when
-        var actualResult = restService.sendPost(URL, httpEntity);
+        var actualResult = restService.sendPost(URL, addressDto);
 
         //then
         assertThat(actualResult).isEqualTo(expectedResult);
@@ -67,13 +64,15 @@ class RestServiceImplTest {
     @Test
     void sendGet_shouldBeThrewRestClientResponseException() {
         //given
-        var httpEntity = new HttpEntity<>(ID);
+        var headers = new HttpHeaders();
+        headers.set("methodName", "Get");
+        var httpEntity = new HttpEntity<>(headers);
         doThrow(RestClientResponseException.class)
                 .when(restTemplate).exchange(URL, HttpMethod.GET, httpEntity, String.class);
         var expectedResult = new ResponseEntity(ResponseDto.failedResponseDto(null), HttpStatus.BAD_REQUEST);
 
         //when
-        var actualResult = restService.sendGet(URL, httpEntity);
+        var actualResult = restService.sendGet(URL);
 
         //then
         assertThat(actualResult).isEqualTo(expectedResult);
@@ -83,12 +82,14 @@ class RestServiceImplTest {
     @Test
     void sendGet_shouldBeSendGetSuccess() {
         //given
-        var httpEntity = new HttpEntity<>(ID);
+        var headers = new HttpHeaders();
+        headers.set("methodName", "Get");
+        var httpEntity = new HttpEntity<>(headers);
         var expectedResult = new ResponseEntity<>(BODY, HttpStatus.OK);
         when(restTemplate.exchange(URL, HttpMethod.GET, httpEntity, String.class)).thenReturn(expectedResult);
 
         //when
-        var actualResult = restService.sendGet(URL, httpEntity);
+        var actualResult = restService.sendGet(URL);
 
         //then
         assertThat(actualResult).isEqualTo(expectedResult);
@@ -99,13 +100,15 @@ class RestServiceImplTest {
     @Test
     void sendDelete_shouldBeThrewRestClientResponseException() {
         //given
-        var httpEntity = new HttpEntity<>(ID);
+        var headers = new HttpHeaders();
+        headers.set("methodName", "Delete");
+        var httpEntity = new HttpEntity<>(headers);
         doThrow(RestClientResponseException.class)
                 .when(restTemplate).exchange(URL, HttpMethod.DELETE, httpEntity, String.class);
         var expectedResult = new ResponseEntity(ResponseDto.failedResponseDto(null), HttpStatus.BAD_REQUEST);
 
         //when
-        var actualResult = restService.sendDelete(URL, httpEntity);
+        var actualResult = restService.sendDelete(URL);
 
         //then
         assertThat(actualResult).isEqualTo(expectedResult);
@@ -113,14 +116,16 @@ class RestServiceImplTest {
     }
 
     @Test
-    void sendDelete_() {
+    void sendDelete_shouldBeSendDeleteSuccessful() {
         //given
-        var httpEntity = new HttpEntity<>(ID);
+        var headers = new HttpHeaders();
+        headers.set("methodName", "Delete");
+        var httpEntity = new HttpEntity<>(headers);
         var expectedResult = new ResponseEntity<>(BODY, HttpStatus.OK);
         when(restTemplate.exchange(URL, HttpMethod.DELETE, httpEntity, String.class)).thenReturn(expectedResult);
 
         //when
-        var actualResult = restService.sendDelete(URL, httpEntity);
+        var actualResult = restService.sendDelete(URL);
 
         //then
         assertThat(actualResult).isEqualTo(expectedResult);

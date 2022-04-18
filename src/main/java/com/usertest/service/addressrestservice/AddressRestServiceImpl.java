@@ -9,7 +9,6 @@ import com.usertest.service.responsevalidationservice.ResponseValidationService;
 import com.usertest.service.restservice.RestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -29,13 +28,14 @@ public class AddressRestServiceImpl implements AddressRestService {
     @Override
     public AddressDto findOrInsertAddress(AddressDto addressDto) {
         var url = remoteUrl + "/address";
-        ResponseEntity<String> responseEntity = restService.sendPost(url, new HttpEntity<>(addressDto));
+        ResponseEntity<String> responseEntity = restService.sendPost(url, addressDto);
         responseValidationService.throwIfResponseEntityNotValid(
                 responseEntity,
                 AddressOperationType.FIND_OR_INSERT_ADDRESS
         );
         String body = responseEntity.getBody();
-        ResponseDto<AddressDto> responseAddressDto = mappingService.readBody(body, new TypeReference<>() {});
+        ResponseDto<AddressDto> responseAddressDto = mappingService.readBody(body, new TypeReference<>() {
+        });
         responseValidationService.throwIfStatusResponseDtoNotValid(
                 responseAddressDto,
                 AddressOperationType.FIND_OR_INSERT_ADDRESS
@@ -47,7 +47,7 @@ public class AddressRestServiceImpl implements AddressRestService {
     public AddressDto getAddressById(long addressId) {
         var url = remoteUrl + "/address/" + addressId;
         ResponseEntity<String> responseEntity =
-                restService.sendGet(url, new HttpEntity<>(addressId));
+                restService.sendGet(url);
         responseValidationService.throwIfResponseEntityNotValid(responseEntity, AddressOperationType.GET_ADDRESS_BY_ID);
         String body = responseEntity.getBody();
         ResponseDto<AddressDto> responseAddressDto = mappingService.readBody(body, new TypeReference<>() {});
@@ -61,8 +61,7 @@ public class AddressRestServiceImpl implements AddressRestService {
     @Override
     public Integer deleteAddressById(long addressId) {
         var url = remoteUrl + "/address/" + addressId;
-        ResponseEntity<String> responseEntity =
-                restService.sendDelete(url, new HttpEntity<>(addressId));
+        ResponseEntity<String> responseEntity = restService.sendDelete(url);
         responseValidationService.throwIfResponseEntityNotValid(responseEntity, AddressOperationType.DELETE_ADDRESS_BY_ID);
         String body = responseEntity.getBody();
         ResponseDto<Integer> responseDto = mappingService.readBody(body, new TypeReference<>() {});
