@@ -1,6 +1,5 @@
 package com.usertest.service.userservice;
 
-import com.usertest.counter.SavedUsersCounter;
 import com.usertest.dto.AddressDto;
 import com.usertest.dto.UserDto;
 import com.usertest.entity.UserEntity;
@@ -50,9 +49,6 @@ class UserServiceImplTest {
 
     @MockBean
     UserMapper userMapper;
-
-    @MockBean
-    SavedUsersCounter savedUsersCounter;
 
     @Test
     void getUserById_shouldBeThrewNotFoundUserException() {
@@ -188,7 +184,6 @@ class UserServiceImplTest {
         when(userRepository.saveUser(userEntity)).thenReturn(userEntity);
         int resultSaving = 1;
         when(numberRepository.saveNumbersList(NUMBERS, ID)).thenReturn(resultSaving);
-        doNothing().when(savedUsersCounter).onUserSave();
         when(userMapper.toUserDto(userEntity, NUMBERS, addressDto)).thenReturn(userDto);
 
         //when
@@ -200,7 +195,6 @@ class UserServiceImplTest {
         verify(userMapper, times(1)).toUserEntity(userDto, ADDRESS_ID);
         verify(userRepository, times(1)).saveUser(userEntity);
         verify(numberRepository, times(1)).saveNumbersList(NUMBERS, ID);
-        verify(savedUsersCounter, times(1)).onUserSave();
         verify(userMapper, times(1)).toUserDto(userEntity, NUMBERS, addressDto);
     }
 

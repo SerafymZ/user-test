@@ -1,6 +1,5 @@
 package com.usertest.service.userservice;
 
-import com.usertest.counter.SavedUsersCounter;
 import com.usertest.dto.AddressDto;
 import com.usertest.dto.UserDto;
 import com.usertest.entity.UserEntity;
@@ -33,8 +32,6 @@ public class UserServiceImpl implements UserService {
     private final NumberRepository numberRepository;
 
     private final UserMapper userMapper;
-
-    private final SavedUsersCounter savedUsersCounter;
 
     @Override
     public UserDto getUserById(long id)  {
@@ -76,7 +73,6 @@ public class UserServiceImpl implements UserService {
                 userMapper.toUserEntity(userDto, resultAddressDto.getId())
         );
         numberRepository.saveNumbersList(userDto.getNumbers(), userEntity.getId());
-        savedUsersCounter.onUserSave();
         return userMapper.toUserDto(userEntity, userDto.getNumbers(), resultAddressDto);
     }
 
