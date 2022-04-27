@@ -12,17 +12,16 @@ import javax.sql.DataSource;
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private DataSource dataSource;
-
-    @Autowired
-    public SecurityConfig(DataSource dataSource) {
-        super();
-        this.dataSource = dataSource;
-    }
+//    @Autowired
+//    private DataSource dataSource;
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.jdbcAuthentication().dataSource(dataSource);
+//        auth.jdbcAuthentication().dataSource(dataSource);
+        auth.inMemoryAuthentication()
+                .withUser("user").password("{bcrypt}$2a$10$j5DUDV4o2reodruq9086FePFB4fxLrzq/0ZUqh3zXotYEaC2oemai").roles("USER")
+                .and()
+                .withUser("admin").password("{bcrypt}$2a$10$50Oag0ifCFghZ1pMU5WeSO1hKHfpgY2DHBAb2TUv/vgK7SWy81IqS").roles("ADMIN");
     }
 
     @Override

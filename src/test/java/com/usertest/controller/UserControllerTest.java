@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
@@ -23,11 +24,14 @@ class UserControllerTest {
     private static final String PATH = "/user/";
     private static final String PATH_WITH_ID = "/user/{id}";
 
-
     private static final String NAME = "Johnson";
     private static final String ADDRESS = "Canada";
     private static final List<String> NUMBERS = List.of("+1234567", "+1233845");
     private static final long ID = 1L;
+
+    private static final String ADMIN = "admin";
+    private static final String ADMIN_ROLE = "ADMIN";
+    private static final String ADMIN_ENCRYPTED_PASSWORD = "{bcrypt}$2a$10$50Oag0ifCFghZ1pMU5WeSO1hKHfpgY2DHBAb2TUv/vgK7SWy81IqS";
 
     @Autowired
     ObjectMapper objectMapper;
@@ -39,6 +43,7 @@ class UserControllerTest {
     UserService userService;
 
     @Test
+    @WithMockUser(username = ADMIN, password = ADMIN_ENCRYPTED_PASSWORD, roles = ADMIN_ROLE)
     void getUserById_shouldBeReturnedUserSuccessfully() throws Exception {
         //given
         var userDto = createUserDto();
@@ -56,6 +61,7 @@ class UserControllerTest {
     }
 
     @Test
+    @WithMockUser(username = ADMIN, password = ADMIN_ENCRYPTED_PASSWORD, roles = ADMIN_ROLE)
     void getUsersByFilters_shouldBeReturnedListOfUsersSuccessfully() throws Exception {
         //given
         var anotherId = 2L;
@@ -89,6 +95,7 @@ class UserControllerTest {
     }
 
     @Test
+    @WithMockUser(username = ADMIN, password = ADMIN_ENCRYPTED_PASSWORD, roles = ADMIN_ROLE)
     void saveUser_shouldBeReturnedUserSuccessfully() throws Exception {
         //given
         var userDto = createUserDto();
@@ -111,6 +118,7 @@ class UserControllerTest {
     }
 
     @Test
+    @WithMockUser(username = ADMIN, password = ADMIN_ENCRYPTED_PASSWORD, roles = ADMIN_ROLE)
     void updateUser_shouldBeReturnedUserSuccessfully() throws Exception {
         //given
         var userDto = createUserDto();
@@ -137,6 +145,7 @@ class UserControllerTest {
     }
 
     @Test
+    @WithMockUser(username = ADMIN, password = ADMIN_ENCRYPTED_PASSWORD, roles = ADMIN_ROLE)
     void deleteUserById_shouldBeReturnedIntSuccessfully() throws Exception {
         //given
         var result = 1;
