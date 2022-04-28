@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
@@ -43,6 +44,10 @@ class UserControllerIntegrationTest {
     private static final List<String> NUMBERS = List.of("+121111111");
     private static final int AGE = 25;
     private static final Long ID = 1L;
+
+    private static final String ADMIN = "admin";
+    private static final String ADMIN_ROLE = "ADMIN";
+    private static final String ADMIN_ENCRYPTED_PASSWORD = "{bcrypt}$2a$10$50Oag0ifCFghZ1pMU5WeSO1hKHfpgY2DHBAb2TUv/vgK7SWy81IqS";
 
     @Value("${remote.url}")
     private String remoteUrl;
@@ -71,6 +76,7 @@ class UserControllerIntegrationTest {
     }
 
     @Sql("/sql/test_data/save_one_user_on_db.sql")
+    @WithMockUser(username = ADMIN, password = ADMIN_ENCRYPTED_PASSWORD, roles = ADMIN_ROLE)
     @Test
     void getUserById() throws Exception {
         //given
@@ -98,6 +104,7 @@ class UserControllerIntegrationTest {
     }
 
     @Sql("/sql/test_data/get_users_by_filters_test_data.sql")
+    @WithMockUser(username = ADMIN, password = ADMIN_ENCRYPTED_PASSWORD, roles = ADMIN_ROLE)
     @Test
     void getUsersByFilters() throws Exception {
         //given
@@ -127,6 +134,7 @@ class UserControllerIntegrationTest {
         verify(restService, times(1)).sendGet(url);
     }
 
+    @WithMockUser(username = ADMIN, password = ADMIN_ENCRYPTED_PASSWORD, roles = ADMIN_ROLE)
     @Test
     void saveUser() throws Exception {
         //given
@@ -159,6 +167,7 @@ class UserControllerIntegrationTest {
         verify(restService, times(1)).sendPost(url, addressDto);
     }
 
+    @WithMockUser(username = ADMIN, password = ADMIN_ENCRYPTED_PASSWORD, roles = ADMIN_ROLE)
     @Test
     void saveUser_checkTransactional() throws Exception {
         //given
@@ -190,6 +199,7 @@ class UserControllerIntegrationTest {
     }
 
     @Sql("/sql/test_data/save_one_user_on_db.sql")
+    @WithMockUser(username = ADMIN, password = ADMIN_ENCRYPTED_PASSWORD, roles = ADMIN_ROLE)
     @Test
     void updateUser() throws Exception {
         //given
@@ -235,6 +245,7 @@ class UserControllerIntegrationTest {
     }
 
     @Sql("/sql/test_data/save_one_user_on_db.sql")
+    @WithMockUser(username = ADMIN, password = ADMIN_ENCRYPTED_PASSWORD, roles = ADMIN_ROLE)
     @Test
     void updateUser_checkTransactional() throws Exception {
         //given
@@ -270,6 +281,7 @@ class UserControllerIntegrationTest {
     }
 
     @Sql("/sql/test_data/save_one_user_on_db.sql")
+    @WithMockUser(username = ADMIN, password = ADMIN_ENCRYPTED_PASSWORD, roles = ADMIN_ROLE)
     @Test
     void deleteUserById() throws Exception {
         //given
@@ -295,6 +307,7 @@ class UserControllerIntegrationTest {
     }
 
     @Sql("/sql/test_data/save_one_user_on_db.sql")
+    @WithMockUser(username = ADMIN, password = ADMIN_ENCRYPTED_PASSWORD, roles = ADMIN_ROLE)
     @Test
     void deleteUserById_checkTransactional() throws Exception {
         //given

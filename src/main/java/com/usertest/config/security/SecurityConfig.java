@@ -12,29 +12,28 @@ import javax.sql.DataSource;
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-//    @Autowired
-//    private DataSource dataSource;
+    private static final String ROLE_ADMIN = "ADMIN";
+    private static final String ROLE_USER = "USER";
+
+    @Autowired
+    private DataSource dataSource;
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-//        auth.jdbcAuthentication().dataSource(dataSource);
-        auth.inMemoryAuthentication()
-                .withUser("user").password("{bcrypt}$2a$10$j5DUDV4o2reodruq9086FePFB4fxLrzq/0ZUqh3zXotYEaC2oemai").roles("USER")
-                .and()
-                .withUser("admin").password("{bcrypt}$2a$10$50Oag0ifCFghZ1pMU5WeSO1hKHfpgY2DHBAb2TUv/vgK7SWy81IqS").roles("ADMIN");
+        auth.jdbcAuthentication().dataSource(dataSource);
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.
-                httpBasic()
+        http
+                .httpBasic()
                 .and()
                 .authorizeRequests()
-                .antMatchers(HttpMethod.GET, "/user").hasAnyRole("USER", "ADMIN")
-                .antMatchers(HttpMethod.GET, "/user/{id:\\d+}").hasRole("ADMIN")
-                .antMatchers(HttpMethod.POST, "/user").hasRole("ADMIN")
-                .antMatchers(HttpMethod.PUT, "/user/{id:\\d+}").hasRole("ADMIN")
-                .antMatchers(HttpMethod.DELETE, "/user/{id:\\d+}").hasRole("ADMIN")
+                .antMatchers(HttpMethod.GET, "/user").hasAnyRole(ROLE_USER, ROLE_ADMIN)
+                .antMatchers(HttpMethod.GET, "/user/{id:\\d+}").hasRole(ROLE_ADMIN)
+                .antMatchers(HttpMethod.POST, "/user").hasRole(ROLE_ADMIN)
+                .antMatchers(HttpMethod.PUT, "/user/{id:\\d+}").hasRole(ROLE_ADMIN)
+                .antMatchers(HttpMethod.DELETE, "/user/{id:\\d+}").hasRole(ROLE_ADMIN)
                 .and()
                 .csrf().disable()
                 .formLogin().disable();

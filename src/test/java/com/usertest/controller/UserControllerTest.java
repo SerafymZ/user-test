@@ -1,15 +1,18 @@
 package com.usertest.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.usertest.controller.initializer.MsSQLServer;
 import com.usertest.dto.UserDto;
 import com.usertest.dto.basedto.ResponseDto;
 import com.usertest.service.userservice.UserService;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
@@ -19,6 +22,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest
+@ContextConfiguration(initializers = MsSQLServer.Initializer.class)
 class UserControllerTest {
 
     private static final String PATH = "/user/";
@@ -41,6 +45,9 @@ class UserControllerTest {
 
     @MockBean
     UserService userService;
+
+    @BeforeAll
+    static void init() { MsSQLServer.container.start();}
 
     @Test
     @WithMockUser(username = ADMIN, password = ADMIN_ENCRYPTED_PASSWORD, roles = ADMIN_ROLE)
