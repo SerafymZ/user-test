@@ -18,7 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
@@ -27,6 +27,7 @@ import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.jdbc.JdbcTestUtils.countRowsInTable;
 import static org.springframework.test.jdbc.JdbcTestUtils.deleteFromTables;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -37,7 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration(initializers = MsSQLServer.Initializer.class)
 class UserControllerIntegrationTest {
 
-    private static final String PATH = "/user/";
+    private static final String PATH_WITHOUT_ID = "/user";
     private static final String PATH_WITH_ID = "/user/{id}";
     private static final String NAME = "Johnson";
     private static final String ADDRESS = "Canada";
@@ -47,7 +48,7 @@ class UserControllerIntegrationTest {
 
     private static final String ADMIN = "admin";
     private static final String ADMIN_ROLE = "ADMIN";
-    private static final String ADMIN_ENCRYPTED_PASSWORD = "{bcrypt}$2a$10$50Oag0ifCFghZ1pMU5WeSO1hKHfpgY2DHBAb2TUv/vgK7SWy81IqS";
+    private static final String ADMIN_PASSWORD = "admin";
 
     @Value("${remote.url}")
     private String remoteUrl;
@@ -76,7 +77,6 @@ class UserControllerIntegrationTest {
     }
 
     @Sql("/sql/test_data/save_one_user_on_db.sql")
-    @WithMockUser(username = ADMIN, password = ADMIN_ENCRYPTED_PASSWORD, roles = ADMIN_ROLE)
     @Test
     void getUserById() throws Exception {
         //given
@@ -95,7 +95,9 @@ class UserControllerIntegrationTest {
         expectedUserDto.setAddress(ADDRESS);
 
         mockMvc.perform(
-                        get(PATH_WITH_ID, ID))
+                        get(PATH_WITH_ID, ID)
+                                .with(httpBasic(ADMIN, ADMIN_PASSWORD)))
+                .andExpect(SecurityMockMvcResultMatchers.authenticated().withRoles(ADMIN_ROLE))
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(ResponseDto.okResponseDto(expectedUserDto))));
 
@@ -104,7 +106,6 @@ class UserControllerIntegrationTest {
     }
 
     @Sql("/sql/test_data/get_users_by_filters_test_data.sql")
-    @WithMockUser(username = ADMIN, password = ADMIN_ENCRYPTED_PASSWORD, roles = ADMIN_ROLE)
     @Test
     void getUsersByFilters() throws Exception {
         //given
@@ -124,9 +125,11 @@ class UserControllerIntegrationTest {
         var partOfName = "son";
         var partOfNumber = "12";
         mockMvc.perform(
-                        get(PATH)
+                        get(PATH_WITHOUT_ID)
                                 .queryParam("partOfName", partOfName)
-                                .queryParam("partOfNumber", partOfNumber))
+                                .queryParam("partOfNumber", partOfNumber)
+                                .with(httpBasic(ADMIN, ADMIN_PASSWORD)))
+                .andExpect(SecurityMockMvcResultMatchers.authenticated().withRoles(ADMIN_ROLE))
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(ResponseDto.okResponseDto(List.of(userDto)))));
 
@@ -134,7 +137,6 @@ class UserControllerIntegrationTest {
         verify(restService, times(1)).sendGet(url);
     }
 
-    @WithMockUser(username = ADMIN, password = ADMIN_ENCRYPTED_PASSWORD, roles = ADMIN_ROLE)
     @Test
     void saveUser() throws Exception {
         //given
@@ -152,9 +154,11 @@ class UserControllerIntegrationTest {
 
         //when
         mockMvc.perform(
-                        post(PATH)
+                        post(PATH_WITHOUT_ID)
                                 .content(objectMapper.writeValueAsString(userDto))
-                                .contentType(MediaType.APPLICATION_JSON))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .with(httpBasic(ADMIN, ADMIN_PASSWORD)))
+                .andExpect(SecurityMockMvcResultMatchers.authenticated().withRoles(ADMIN_ROLE))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.name").value("Johnson"))
                 .andExpect(jsonPath("$.data.age").value("25"))
@@ -167,7 +171,6 @@ class UserControllerIntegrationTest {
         verify(restService, times(1)).sendPost(url, addressDto);
     }
 
-    @WithMockUser(username = ADMIN, password = ADMIN_ENCRYPTED_PASSWORD, roles = ADMIN_ROLE)
     @Test
     void saveUser_checkTransactional() throws Exception {
         //given
@@ -186,20 +189,21 @@ class UserControllerIntegrationTest {
 
         //when
         mockMvc.perform(
-                        post(PATH)
+                        post(PATH_WITHOUT_ID)
                                 .content(objectMapper.writeValueAsString(userDto))
-                                .contentType(MediaType.APPLICATION_JSON))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .with(httpBasic(ADMIN, ADMIN_PASSWORD)))
+                .andExpect(SecurityMockMvcResultMatchers.authenticated().withRoles(ADMIN_ROLE))
                 .andExpect(status().isNotFound());
 
         //then
-        assertThat(countRowsInTable(jdbcTemplate, "[user]")).isEqualTo(0);
-        assertThat(countRowsInTable(jdbcTemplate, "number")).isEqualTo(0);
+        assertThat(countRowsInTable(jdbcTemplate, "[user]")).isZero();
+        assertThat(countRowsInTable(jdbcTemplate, "number")).isZero();
 
         verify(restService, times(1)).sendPost(url, addressDto);
     }
 
     @Sql("/sql/test_data/save_one_user_on_db.sql")
-    @WithMockUser(username = ADMIN, password = ADMIN_ENCRYPTED_PASSWORD, roles = ADMIN_ROLE)
     @Test
     void updateUser() throws Exception {
         //given
@@ -232,7 +236,9 @@ class UserControllerIntegrationTest {
         mockMvc.perform(
                         put(PATH_WITH_ID, ID)
                                 .content(objectMapper.writeValueAsString(updatedUserDto))
-                                .contentType(MediaType.APPLICATION_JSON))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .with(httpBasic(ADMIN, ADMIN_PASSWORD)))
+                .andExpect(SecurityMockMvcResultMatchers.authenticated().withRoles(ADMIN_ROLE))
                 .andExpect(status().isOk())
                 .andExpect(content()
                         .json(objectMapper.writeValueAsString(ResponseDto.okResponseDto(updatedUserDtoWithId))));
@@ -245,7 +251,6 @@ class UserControllerIntegrationTest {
     }
 
     @Sql("/sql/test_data/save_one_user_on_db.sql")
-    @WithMockUser(username = ADMIN, password = ADMIN_ENCRYPTED_PASSWORD, roles = ADMIN_ROLE)
     @Test
     void updateUser_checkTransactional() throws Exception {
         //given
@@ -270,7 +275,8 @@ class UserControllerIntegrationTest {
         mockMvc.perform(
                         put(PATH_WITH_ID, ID)
                                 .content(objectMapper.writeValueAsString(updatedUserDto))
-                                .contentType(MediaType.APPLICATION_JSON))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .with(httpBasic(ADMIN, ADMIN_PASSWORD)))
                 .andExpect(status().isNotFound());
 
         //then
@@ -281,7 +287,6 @@ class UserControllerIntegrationTest {
     }
 
     @Sql("/sql/test_data/save_one_user_on_db.sql")
-    @WithMockUser(username = ADMIN, password = ADMIN_ENCRYPTED_PASSWORD, roles = ADMIN_ROLE)
     @Test
     void deleteUserById() throws Exception {
         //given
@@ -295,7 +300,9 @@ class UserControllerIntegrationTest {
 
         //when
         mockMvc.perform(
-                        delete(PATH_WITH_ID, ID))
+                        delete(PATH_WITH_ID, ID)
+                                .with(httpBasic(ADMIN, ADMIN_PASSWORD)))
+                .andExpect(SecurityMockMvcResultMatchers.authenticated().withRoles(ADMIN_ROLE))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data").value("1"));
 
@@ -307,7 +314,6 @@ class UserControllerIntegrationTest {
     }
 
     @Sql("/sql/test_data/save_one_user_on_db.sql")
-    @WithMockUser(username = ADMIN, password = ADMIN_ENCRYPTED_PASSWORD, roles = ADMIN_ROLE)
     @Test
     void deleteUserById_checkTransactional() throws Exception {
         //given
@@ -321,7 +327,9 @@ class UserControllerIntegrationTest {
 
         //when
         mockMvc.perform(
-                        delete(PATH_WITH_ID, ID))
+                        delete(PATH_WITH_ID, ID)
+                                .with(httpBasic(ADMIN, ADMIN_PASSWORD)))
+                .andExpect(SecurityMockMvcResultMatchers.authenticated().withRoles(ADMIN_ROLE))
                 .andExpect(status().is5xxServerError())
                 .andExpect(jsonPath("$.data").value("Incorrect response entity status on " +
                         "operation delete address by id. Received status: BAD_REQUEST"));

@@ -1,20 +1,19 @@
 package com.usertest.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.usertest.controller.initializer.MsSQLServer;
 import com.usertest.dto.UserDto;
 import com.usertest.dto.basedto.ResponseDto;
 import com.usertest.service.userservice.UserService;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers;
 import org.springframework.test.web.servlet.MockMvc;
 
+import javax.sql.DataSource;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
@@ -22,20 +21,18 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest
-@ContextConfiguration(initializers = MsSQLServer.Initializer.class)
 class UserControllerTest {
 
-    private static final String PATH = "/user/";
+    private static final String PATH_WITHOUT_ID = "/user";
     private static final String PATH_WITH_ID = "/user/{id}";
 
     private static final String NAME = "Johnson";
     private static final String ADDRESS = "Canada";
-    private static final List<String> NUMBERS = List.of("+1234567", "+1233845");
+    private static final List<String> NUMBERS = List.of("+1234567", "+8733845");
     private static final long ID = 1L;
 
-    private static final String ADMIN = "admin";
     private static final String ADMIN_ROLE = "ADMIN";
-    private static final String ADMIN_ENCRYPTED_PASSWORD = "{bcrypt}$2a$10$50Oag0ifCFghZ1pMU5WeSO1hKHfpgY2DHBAb2TUv/vgK7SWy81IqS";
+    private static final String USER_ROLE = "USER";
 
     @Autowired
     ObjectMapper objectMapper;
@@ -46,11 +43,11 @@ class UserControllerTest {
     @MockBean
     UserService userService;
 
-    @BeforeAll
-    static void init() { MsSQLServer.container.start();}
+    @MockBean
+    DataSource dataSource;
 
     @Test
-    @WithMockUser(username = ADMIN, password = ADMIN_ENCRYPTED_PASSWORD, roles = ADMIN_ROLE)
+    @WithMockUser(roles = ADMIN_ROLE)
     void getUserById_shouldBeReturnedUserSuccessfully() throws Exception {
         //given
         var userDto = createUserDto();
@@ -59,7 +56,8 @@ class UserControllerTest {
 
         //when
         mockMvc.perform(
-                get(PATH_WITH_ID, ID))
+                        get(PATH_WITH_ID, ID))
+                .andExpect(SecurityMockMvcResultMatchers.authenticated().withRoles(ADMIN_ROLE))
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(ResponseDto.okResponseDto(userDto))));
 
@@ -68,7 +66,17 @@ class UserControllerTest {
     }
 
     @Test
-    @WithMockUser(username = ADMIN, password = ADMIN_ENCRYPTED_PASSWORD, roles = ADMIN_ROLE)
+    @WithMockUser(roles = USER_ROLE)
+    void getUserById_shouldBeForbidden() throws Exception {
+        //when
+        mockMvc.perform(
+                        get(PATH_WITH_ID, ID))
+                .andExpect(SecurityMockMvcResultMatchers.authenticated().withRoles(USER_ROLE))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = {ADMIN_ROLE, USER_ROLE})
     void getUsersByFilters_shouldBeReturnedListOfUsersSuccessfully() throws Exception {
         //given
         var anotherId = 2L;
@@ -91,9 +99,10 @@ class UserControllerTest {
 
         //when
         mockMvc.perform(
-                get("/user/")
-                        .queryParam("partOfName", partOfName)
-                        .queryParam("partOfNumber", partOfNumber))
+                        get(PATH_WITHOUT_ID)
+                                .queryParam("partOfName", partOfName)
+                                .queryParam("partOfNumber", partOfNumber))
+                .andExpect(SecurityMockMvcResultMatchers.authenticated().withRoles(ADMIN_ROLE, USER_ROLE))
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(ResponseDto.okResponseDto(userList))));
 
@@ -102,7 +111,7 @@ class UserControllerTest {
     }
 
     @Test
-    @WithMockUser(username = ADMIN, password = ADMIN_ENCRYPTED_PASSWORD, roles = ADMIN_ROLE)
+    @WithMockUser(roles = ADMIN_ROLE)
     void saveUser_shouldBeReturnedUserSuccessfully() throws Exception {
         //given
         var userDto = createUserDto();
@@ -114,9 +123,10 @@ class UserControllerTest {
 
         //when
         mockMvc.perform(
-                post(PATH)
-                        .content(objectMapper.writeValueAsString(userDto))
-                        .contentType(MediaType.APPLICATION_JSON))
+                        post(PATH_WITHOUT_ID)
+                                .content(objectMapper.writeValueAsString(userDto))
+                                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(SecurityMockMvcResultMatchers.authenticated().withRoles(ADMIN_ROLE))
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(ResponseDto.okResponseDto(resultUserDto))));
 
@@ -125,7 +135,22 @@ class UserControllerTest {
     }
 
     @Test
-    @WithMockUser(username = ADMIN, password = ADMIN_ENCRYPTED_PASSWORD, roles = ADMIN_ROLE)
+    @WithMockUser(roles = USER_ROLE)
+    void saveUser_shouldBeForbidden() throws Exception {
+        //given
+        var userDto = createUserDto();
+
+        //when
+        mockMvc.perform(
+                        post(PATH_WITHOUT_ID)
+                                .content(objectMapper.writeValueAsString(userDto))
+                                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(SecurityMockMvcResultMatchers.authenticated().withRoles(USER_ROLE))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = ADMIN_ROLE)
     void updateUser_shouldBeReturnedUserSuccessfully() throws Exception {
         //given
         var userDto = createUserDto();
@@ -142,8 +167,9 @@ class UserControllerTest {
 
         //when
         mockMvc.perform(put(PATH_WITH_ID, ID)
-                .content(objectMapper.writeValueAsString(userDto))
-                .contentType(MediaType.APPLICATION_JSON))
+                        .content(objectMapper.writeValueAsString(userDto))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(SecurityMockMvcResultMatchers.authenticated().withRoles(ADMIN_ROLE))
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(ResponseDto.okResponseDto(resultUserDto))));
 
@@ -152,7 +178,21 @@ class UserControllerTest {
     }
 
     @Test
-    @WithMockUser(username = ADMIN, password = ADMIN_ENCRYPTED_PASSWORD, roles = ADMIN_ROLE)
+    @WithMockUser(roles = USER_ROLE)
+    void updateUser_shouldBeForbidden() throws Exception {
+        //given
+        var userDto = createUserDto();
+
+        //when
+        mockMvc.perform(put(PATH_WITH_ID, ID)
+                        .content(objectMapper.writeValueAsString(userDto))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(SecurityMockMvcResultMatchers.authenticated().withRoles(USER_ROLE))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = ADMIN_ROLE)
     void deleteUserById_shouldBeReturnedIntSuccessfully() throws Exception {
         //given
         var result = 1;
@@ -160,12 +200,27 @@ class UserControllerTest {
 
         //when
         mockMvc.perform(
-                delete(PATH_WITH_ID, ID))
+                        delete(PATH_WITH_ID, ID))
+                .andExpect(SecurityMockMvcResultMatchers.authenticated().withRoles(ADMIN_ROLE))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data").value(result));
 
         //then
         verify(userService, times(1)).deleteUserById(ID);
+    }
+
+    @Test
+    @WithMockUser(roles = USER_ROLE)
+    void deleteUserById_shouldBeForbidden() throws Exception {
+        //given
+        var result = 1;
+        when(userService.deleteUserById(ID)).thenReturn(result);
+
+        //when
+        mockMvc.perform(
+                        delete(PATH_WITH_ID, ID))
+                .andExpect(SecurityMockMvcResultMatchers.authenticated().withRoles(USER_ROLE))
+                .andExpect(status().isForbidden());
     }
 
     private UserDto createUserDto() {
